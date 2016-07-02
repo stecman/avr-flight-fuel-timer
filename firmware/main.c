@@ -37,11 +37,30 @@ void low_clock_delay(char seconds)
  * Watch dog timer interrupt handler
  */
 ISR(WDT_vect) {
+    wdt_reset();
+    wdt_disable();
+    
+    PORTD ^= 1 << 6; // Toggle digital pin 6
+
     // Show we've been interrupted
     char i;
     for (i = 0; i < 2; i++) {
         PORTB ^= 1 << 5; // Toggle LED
-        _delay_ms(20);
+        _delay_ms(50);
+    }
+
+    _delay_ms(3000);
+
+    for (i = 0; i < 4; i++) {
+        PORTB ^= 1 << 5; // Toggle LED
+        _delay_ms(50);
+    }
+    
+    low_clock_delay(3);
+
+    for (i = 0; i < 6; i++) {
+        PORTB ^= 1 << 5; // Toggle LED
+        _delay_ms(50);
     }
 }
 
@@ -85,20 +104,21 @@ int main(void)
     wdt_disable();
 
     DDRB = 1 << 5; // LED as output
+    DDRD = 1 << 6; // Digital pin 6 as output
     
-    // Brief boot-up time to allow for screwing up the watch dog timer
-    // Watchdog isn't affected by reset pin, so manual timing of power-on is needed
-    // to flash if bad code is flashed during development
-    PORTB ^= 1 << 5; // Toggle LED
-    low_clock_delay(1);
-    PORTB ^= 1 << 5; // Toggle LED
-    low_clock_delay(1);
-    PORTB ^= 1 << 5; // Toggle LED
-    low_clock_delay(1);
-    PORTB ^= 1 << 5; // Toggle LED
+    char i = 5;
+    do {
+        // Brief boot-up time to allow for screwing up the watch dog timer
+        // Watchdog isn't affected by reset pin, so manual timing of power-on is needed
+        // to flash if bad code is flashed during development
+        PORTB ^= 1 << 5; // Toggle LED
+        low_clock_delay(1);
+    } while(i--);
+
+    _delay_ms(3000);
 
     for (;;) {
-        cpu_sleep_delay(WDTO_1S);
+        cpu_sleep_delay(WDTO_4S);
     }
 
     return 0;
