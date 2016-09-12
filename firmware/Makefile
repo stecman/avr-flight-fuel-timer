@@ -21,7 +21,8 @@ DEVICE     = atmega328p
 CLOCK      = 16000000
 PROGRAMMER = -c arduino -P /dev/tty.usbserial-AI041T1K -b57600
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0x24:m
-OBJECTS    = main.o
+SOURCES    = $(shell find -name '*.c')
+OBJECTS    = $(SOURCES:.c=.o)
 
 # ATMega8 fuse bits used above (fuse bits for other devices are different!):
 # Example for 8 MHz internal oscillator
@@ -50,9 +51,14 @@ OBJECTS    = main.o
 
 AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
+COMPILE += -I -I. -I./lib/
+COMPILE += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
+COMPILE += -ffunction-sections -fdata-sections -Wl,--gc-sections
+COMPILE += -Wl,--relax -mcall-prologues
+COMPILE += -std=gnu99 -Wstrict-prototypes
 
 # symbolic targets:
-all:	main.hex
+all: $(SOURCES) main.hex
 
 .c.o:
 	$(COMPILE) -c $< -o $@
@@ -81,7 +87,9 @@ load: all
 	bootloadHID main.hex
 
 clean:
-	rm -f main.hex main.elf $(OBJECTS)
+	find -name '*.d' -exec rm {} +
+	find -name '*.o' -exec rm {} +
+	rm -f main.hex main.elf
 
 # file targets:
 main.elf: $(OBJECTS)
