@@ -4,9 +4,10 @@
 
 * Display time remaining in each tank
 * Swtich active tank
-  Fuel can be drained from one tank at a time. The user selects the tank that is
-  currently selected in the aircraft, which causes that tank's endurance timer
-  to count down.
+  Fuel can be drained from one tank at a time or both tanks simultaneously. The
+  user selects the tanks that are currently selected in the aircraft, which
+  causes those tank's endurance timers to count down (with time divided across
+  multiple tanks if crossfeeding is in use.)
 * Pre-flight programming state allowing at least configuration of time in each tank
 * Start flight action
 * End flight action (to prevent warning features tripping)
@@ -54,3 +55,5 @@
   unusable fuel. The burn per hour and unusable could be recalled from EEPROM.
 * Low power mode where the user has to trigger an interupt to see the display
   for five seconds at a time.
+* Wireless module with 7-segment display(s) to mount to instrument panel. This
+  could show time remaining in current tank/flight, or some configurable value.
