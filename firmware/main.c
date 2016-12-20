@@ -4,12 +4,20 @@
  * License: MIT
  */
 
+#include "u8glib/src/u8g.h"
+#include "power_control.h"
+#include "rotary_encoder.h"
+
 #include <avr/io.h>
-#include <util/delay.h>
-#include <avr/power.h>
 #include <avr/wdt.h>
-#include <avr/sleep.h>
+#include <string.h>
+#include <util/delay.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
+
+#define TWI_SCREEN_ADDR 0x3C
+#define TWI_RTC_ADDR 0x50
+#define TWI_EERPOM_ADDR 0x68
 
 /**
  * This code was written using an Arduino mini 5V (ATmega 328p)
@@ -19,82 +27,48 @@
  * https://www.arduino.cc/en/Hacking/PinMapping168
  */
 
-/**
- * Go into a super low clock speed state and wait a number of seconds
- * Need to test if this is actually useful for saving power
- */
-void low_clock_delay(char seconds)
+static u8g_t u8g;
+
+volatile struct rtenc_state cursor;
+
+const __flash uint8_t menu_0[] = "I am a horse";
+const __flash uint8_t menu_1[] = "I am a dog";
+const __flash uint8_t menu_2[] = "I am a frog";
+const __flash uint8_t menu_3[] = "I am a log";
+const __flash uint8_t menu_4[] = "I don't really know";
+
+const __flash uint8_t* const __flash string_table[] = {
+    menu_0,
+    menu_1,
+    menu_2,
+    menu_3,
+    menu_4
+};
+
+void u8g_setup(void)
 {
-    clock_prescale_set(clock_div_256); // 62KHz on 328p
-    while (seconds > 0) {
-        seconds--;
-        _delay_ms(1000/256);
-    }
-    clock_prescale_set(clock_div_1); // return to 16MHz
+    u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);
 }
 
-/**
- * Watch dog timer interrupt handler
- */
-ISR(WDT_vect) {
-    wdt_reset();
-    wdt_disable();
-    
-    PORTD ^= 1 << 6; // Toggle digital pin 6
-
-    // Show we've been interrupted
-    char i;
-    for (i = 0; i < 2; i++) {
-        PORTB ^= 1 << 5; // Toggle LED
-        _delay_ms(50);
-    }
-
-    _delay_ms(3000);
-
-    for (i = 0; i < 4; i++) {
-        PORTB ^= 1 << 5; // Toggle LED
-        _delay_ms(50);
-    }
-    
-    low_clock_delay(3);
-
-    for (i = 0; i < 6; i++) {
-        PORTB ^= 1 << 5; // Toggle LED
-        _delay_ms(50);
-    }
-}
-
-/**
- * Put the microcontroller in low power sleep for a period of time, waking on any interrupt
- * 
- * This uses the watchdog timer to wake by default, but any interrupt will bring the controller
- * out of its heavy sleep state
- *
- * Pass one of the WDTO_* constants to specify a time
- * http://www.atmel.com/webdoc/AVRLibcReferenceManual/group__avr__watchdog.html
- */
-void cpu_sleep_delay(char WDTO_value)
+void draw(uint8_t position)
 {
-    cli(); // disable interrupts
+    char str[] = "\"What is you?\" 1.0";
+    u8g_DrawStr(&u8g, 1, 8, str);
+    u8g_DrawLine(&u8g, 0, 11, 128, 11);
 
-    // Remove the safety on sleep
-    sleep_enable();
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    uint8_t offset = 0;
+    for (uint8_t i = 0; i < 5; i++) {
+        offset = (i * 9) + 17;
 
-    wdt_reset();
-    wdt_enable(WDTO_value);
-
-    // Put the watchdog timer in interrupt mode
-    WDTCSR = _BV(WDIF) | _BV(WDIE) | _BV(WDCE);
-
-    sei(); // enable interrupts
-    sleep_mode(); // actually sleep
-
-    // Execution reaches here after wake up by watch dog timer
-    sleep_disable();
-    wdt_reset();
-    wdt_disable();
-    power_all_enable(); // re-enable peripherals
+        if (i == (position % 5)) {
+            u8g_DrawRBox(&u8g, 0, offset + 1, 128, 8, 0);
+            u8g_SetColorIndex(&u8g, 0);
+            u8g_DrawStrP(&u8g, 1, offset + 8, string_table[i]);
+            u8g_SetColorIndex(&u8g, 1);
+        } else {
+            u8g_DrawStrP(&u8g, 1, offset + 8, string_table[i]);
+        }
+    }
 }
 
 int main(void)
@@ -103,24 +77,34 @@ int main(void)
     wdt_reset();
     wdt_disable();
 
-    DDRB = 1 << 5; // LED as output
-    DDRD = 1 << 6; // Digital pin 6 as output
-    
-    char i = 5;
-    do {
-        // Brief boot-up time to allow for screwing up the watch dog timer
-        // Watchdog isn't affected by reset pin, so manual timing of power-on is needed
-        // to flash if bad code is flashed during development
-        PORTB ^= 1 << 5; // Toggle LED
-        low_clock_delay(1);
-    } while(i--);
+    // select minimal prescaler (max system speed)
+    CLKPR = 0x80;
+    CLKPR = 0x00;
 
-    _delay_ms(3000);
+    cursor.position = 0;
+    cursor.factor = 1;
+
+    rtenc_setup();
+    rtenc_bind(&cursor);
+    u8g_setup();
+
+    uint8_t pos;
+
+    u8g_SetFont(&u8g, u8g_font_5x8);
 
     for (;;) {
-        cpu_sleep_delay(WDTO_4S);
+        if (cursor.position == pos) {
+            continue;
+        }
+
+        pos = cursor.position;
+
+        u8g_FirstPage(&u8g);
+        do
+        {
+            draw(pos);
+        } while ( u8g_NextPage(&u8g) );
     }
 
     return 0;
 }
-
