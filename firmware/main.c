@@ -4,10 +4,6 @@
  * License: MIT
  */
 
-#include "u8glib/src/u8g.h"
-#include "power_control.h"
-#include "rotary_encoder.h"
-
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <string.h>
@@ -15,9 +11,9 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
-#define TWI_SCREEN_ADDR 0x3C
-#define TWI_RTC_ADDR 0x50
-#define TWI_EERPOM_ADDR 0x68
+#include "u8glib/src/u8g.h"
+#include "control/rotary_encoder.h"
+#include "display/menu.h"
 
 /**
  * This code was written using an Arduino mini 5V (ATmega 328p)
@@ -29,46 +25,26 @@
 
 static u8g_t u8g;
 
-volatile struct rtenc_state cursor;
+static const __flash char mnu_generic_back[] = "Back";
 
-const __flash uint8_t menu_0[] = "I am a horse";
-const __flash uint8_t menu_1[] = "I am a dog";
-const __flash uint8_t menu_2[] = "I am a frog";
-const __flash uint8_t menu_3[] = "I am a log";
-const __flash uint8_t menu_4[] = "I don't really know";
-
-const __flash uint8_t* const __flash string_table[] = {
-    menu_0,
-    menu_1,
-    menu_2,
-    menu_3,
-    menu_4
-};
+static const __flash char mnu_aircraftcfg_title[] = "Aircraft config";
+static const __flash char mnu_aircraftcfg_save[] = "Load / store";
+static const __flash char mnu_aircraftcfg_burn_cruise[] = "Fuel burn cruise";
+static const __flash char mnu_aircraftcfg_burn_taxi[] = "Fuel burn taxi";
+static const __flash char mnu_aircraftcfg_xfeed[] = "Crossfeed avail.";
+static const __flash char mnu_aircraftcfg_reserve[] = "Reserve time";
+static const __flash char mnu_aircraftcfg_tankrotation[] = "Tank rotation";
+static const __flash char mnu_aircraftcfg_tankbalance[] = "Tank auto-balance";
 
 void u8g_setup(void)
 {
     u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);
+    // u8g_InitHWSPI(&u8g, &u8g_dev_ssd1306_128x64_hw_spi, PN(1,0), PN(1,1), PN(1,2));
 }
 
-void draw(uint8_t position)
+void onclick(void)
 {
-    char str[] = "\"What is you?\" 1.0";
-    u8g_DrawStr(&u8g, 1, 8, str);
-    u8g_DrawLine(&u8g, 0, 11, 128, 11);
 
-    uint8_t offset = 0;
-    for (uint8_t i = 0; i < 5; i++) {
-        offset = (i * 9) + 17;
-
-        if (i == (position % 5)) {
-            u8g_DrawRBox(&u8g, 0, offset + 1, 128, 8, 0);
-            u8g_SetColorIndex(&u8g, 0);
-            u8g_DrawStrP(&u8g, 1, offset + 8, string_table[i]);
-            u8g_SetColorIndex(&u8g, 1);
-        } else {
-            u8g_DrawStrP(&u8g, 1, offset + 8, string_table[i]);
-        }
-    }
 }
 
 int main(void)
@@ -81,29 +57,46 @@ int main(void)
     CLKPR = 0x80;
     CLKPR = 0x00;
 
-    cursor.position = 0;
-    cursor.factor = 1;
-
     rtenc_setup();
-    rtenc_bind(&cursor);
     u8g_setup();
 
-    uint8_t pos;
+    menu_item* items[] = {
+        menu_item_action_init(mnu_generic_back, &onclick),
+        menu_item_action_init(mnu_aircraftcfg_save, &onclick),
+        menu_item_action_init(mnu_aircraftcfg_burn_cruise, &onclick),
+        menu_item_action_init(mnu_aircraftcfg_burn_taxi, &onclick),
+        menu_item_action_init(mnu_aircraftcfg_xfeed, &onclick),
+        menu_item_action_init(mnu_aircraftcfg_reserve, &onclick),
+        menu_item_action_init(mnu_aircraftcfg_tankrotation, &onclick),
+        menu_item_action_init(mnu_aircraftcfg_tankbalance, &onclick),
+    };
 
-    u8g_SetFont(&u8g, u8g_font_5x8);
+    menu_screen* menu = menu_init(
+        mnu_aircraftcfg_title,
+        items,
+        8
+    );
+
+    rtenc_state cursor;
+    cursor.position = 0;
+    rtenc_bind(&cursor);
+
+    uint8_t lastPos;
 
     for (;;) {
-        if (cursor.position == pos) {
+        if (cursor.position == lastPos) {
             continue;
         }
 
-        pos = cursor.position;
+        menu->cursor_pos = cursor.position;
 
         u8g_FirstPage(&u8g);
         do
         {
-            draw(pos);
+            menu_draw(&u8g, menu);
         } while ( u8g_NextPage(&u8g) );
+
+        lastPos = cursor.position;
     }
 
     return 0;
