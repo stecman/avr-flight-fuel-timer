@@ -14,8 +14,8 @@
  */
 typedef struct menu_item {
 	const u8g_pgm_uint8_t *title;
-	char* (*format_value)(void);
-	void (*handle_click)(void);
+	const char* (*format_value)(void);
+	const void (*handle_click)(void);
 } menu_item;
 
 /**
@@ -31,9 +31,9 @@ typedef struct menu_screen {
 /**
  * Draw the given menu to screen
  */
-void menu_draw(u8g_t* u8g, menu_screen* menu);
+void menu_draw(u8g_t* u8g, const menu_screen* menu);
 
 /**
- * Given a boolean value, return a human readable string
+ * Return a human readable string for a boolean
  */
 char* menu_val_format_bool(int value);
