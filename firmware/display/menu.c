@@ -6,39 +6,6 @@
 #define SCREEN_HEIGHT 64
 #define MAX_ITEMS_ON_SCREEN 5
 
-// Scrolling
-
-// Draw title
-
-// Draw menu
-
-menu_screen* menu_init(
-    const __flash char* title,
-    menu_item* items[],
-    uint8_t num_items
-) {
-    menu_screen* screen = malloc(sizeof(menu_screen));
-
-    screen->title = title;
-    screen->items = items;
-    screen->num_items = num_items;
-    screen->cursor_pos = 0;
-
-    return screen;
-}
-
-menu_item* menu_item_action_init(
-    const __flash char* title,
-    void (*handle_click)(void)
-) {
-    menu_item* item = malloc(sizeof(menu_item));
-
-    item->title = title;
-    item->handle_click = handle_click;
-
-    return item;
-}
-
 void menu_draw(u8g_t* u8g, menu_screen* menu)
 {
     // Keep track of where we're drawing on screen
@@ -83,7 +50,7 @@ void menu_draw(u8g_t* u8g, menu_screen* menu)
 
     // Render menu items
     for (uint8_t i = idxStart; i < idxEnd; i++) {
-        menu_item* item = menu->items[i];
+        menu_item* item = &(menu->items[i]);
 
         drawOffset = (drawIndex * 9) + 17;
         drawIndex++;

@@ -23,24 +23,10 @@ typedef struct menu_item {
  */
 typedef struct menu_screen {
 	const u8g_pgm_uint8_t *title;
-	menu_item** items;
+	const menu_item* items;
 	uint8_t num_items;
 	uint8_t cursor_pos;
 } menu_screen;
-
-/**
- * Allocate and return new menu screen instance
- */
-menu_screen* menu_init(
-	const __flash char* title,
-	menu_item* items[],
-	uint8_t num_items
-);
-
-menu_item* menu_item_action_init(
-	const __flash char* title,
-	void (*handle_click)(void)
-);
 
 /**
  * Draw the given menu to screen

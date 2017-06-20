@@ -11,9 +11,13 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
-#include "u8glib/src/u8g.h"
+// Project
 #include "control/rotary_encoder.h"
 #include "display/menu.h"
+#include "macros.h"
+
+// External
+#include "u8glib/src/u8g.h"
 
 /**
  * This code was written using an Arduino mini 5V (ATmega 328p)
@@ -38,8 +42,8 @@ static const __flash char mnu_aircraftcfg_tankbalance[] = "Tank auto-balance";
 
 void u8g_setup(void)
 {
-    u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);
-    // u8g_InitHWSPI(&u8g, &u8g_dev_ssd1306_128x64_hw_spi, PN(1,0), PN(1,1), PN(1,2));
+    // u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);
+    u8g_InitHWSPI(&u8g, &u8g_dev_ssd1306_128x64_hw_spi, PN(1,2), PN(2,1), PN(2,0));
 }
 
 void onclick(void)
@@ -60,22 +64,22 @@ int main(void)
     rtenc_setup();
     u8g_setup();
 
-    menu_item* items[] = {
-        menu_item_action_init(mnu_generic_back, &onclick),
-        menu_item_action_init(mnu_aircraftcfg_save, &onclick),
-        menu_item_action_init(mnu_aircraftcfg_burn_cruise, &onclick),
-        menu_item_action_init(mnu_aircraftcfg_burn_taxi, &onclick),
-        menu_item_action_init(mnu_aircraftcfg_xfeed, &onclick),
-        menu_item_action_init(mnu_aircraftcfg_reserve, &onclick),
-        menu_item_action_init(mnu_aircraftcfg_tankrotation, &onclick),
-        menu_item_action_init(mnu_aircraftcfg_tankbalance, &onclick),
+    menu_item items[] = {
+        { .title = mnu_generic_back },
+        { .title = mnu_aircraftcfg_save },
+        { .title = mnu_aircraftcfg_burn_cruise },
+        { .title = mnu_aircraftcfg_burn_taxi },
+        { .title = mnu_aircraftcfg_xfeed },
+        { .title = mnu_aircraftcfg_reserve },
+        { .title = mnu_aircraftcfg_tankrotation },
+        { .title = mnu_aircraftcfg_tankbalance },
     };
 
-    menu_screen* menu = menu_init(
-        mnu_aircraftcfg_title,
-        items,
-        8
-    );
+    menu_screen menu = {
+        .title = mnu_aircraftcfg_title,
+        .items = &items,
+        .num_items = COUNT_OF(items)
+    };
 
     rtenc_state cursor;
     cursor.position = 0;
@@ -88,12 +92,12 @@ int main(void)
             continue;
         }
 
-        menu->cursor_pos = cursor.position;
+        menu.cursor_pos = cursor.position;
 
         u8g_FirstPage(&u8g);
         do
         {
-            menu_draw(&u8g, menu);
+            menu_draw(&u8g, &menu);
         } while ( u8g_NextPage(&u8g) );
 
         lastPos = cursor.position;
