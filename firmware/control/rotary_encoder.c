@@ -44,11 +44,11 @@ void _handleMove(void)
     // Use the lower 4 state bits to select a value base on the last two updates
     switch (encoderState & 0xf) {
         case 0b1011:
-            __rtenc_state->position += 1;
+            __rtenc_state->position -= 1;
             break;
 
         case 0b0111:
-            __rtenc_state->position -= 1;
+            __rtenc_state->position += 1;
             break;
     }
 
