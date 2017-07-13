@@ -1,72 +1,73 @@
 #include <avr/interrupt.h>
 
 #include "rotary_encoder.h"
+#include "../beeper.h"
 
-static rtenc_state* __rtenc_state;
+// Global state where rotary encoder input should go
+// This is changed using rtenc_bind()
+static rtenc_state* _current_state;
 
-/**
- * Set up rotary encoder pins
- * This assumes pin 2 & 3 are CLK and DAT, and pin 10 is the press switch
- */
+// Set up rotary encoder pins and interrupts
 void rtenc_setup(void)
 {
-	DDRD &= ~(1 << 2 | 1 << 3); // Pin 2 & 3 as inputs
-    DDRD &= ~_BV(4); // Pin 10 as input
+    DDRD &= ~(_BV(PD2) | _BV(PD3) | _BV(PD4)); // Encoder and push-button as inputs
+    PORTD |= _BV(PD2); // Pull-up for push-button
 
-    PORTD |= _BV(4); // Pull-up for switch
+    EIMSK |= _BV(INT0); // Enable INT0 for push-button
+    EICRA |= _BV(ISC11); // Trigger on falling edge
 
-    EIMSK |= (1 << INT0) | (1 << INT1); // Enable pin change interrupts for PCINT 1 and 0
-    EICRA |= (1 << ISC01) | (1 << ISC00); // Falling edge on INT0 generates an interrupt
-    EICRA |= (1 << ISC11) | (1 << ISC10); // Rising edge on INT1 generates an interrupt
+    // Enable pin change interrupt for both rotary encoder outputs (PD3/PD4)
+    PCMSK2 |= _BV(PCINT19) | _BV(PCINT20);
+    PCICR |= _BV(PCIE2);
+
     sei(); // enable interrupts
 }
 
-/**
- * Bind all rotary encoder movements to a particular state referemce
- */
+// Bind all rotary encoder movements to a particular state reference
 void rtenc_bind(rtenc_state *state)
 {
-	__rtenc_state = state;
+    _current_state = state;
 }
 
-/**
- * Handle either interrupt triggering
- */
-void _handleMove(void)
-{
-    static volatile short encoderState = 0;
-
-    cli();
-
-    encoderState <<= 2; // Shift previous state
-    encoderState |= 0x03 & (PIND >> 2); // Add bits 2 and 3 to the state
-
-    // Use the lower 4 state bits to select a value base on the last two updates
-    switch (encoderState & 0xf) {
-        case 0b1011:
-            __rtenc_state->position -= 1;
-            break;
-
-        case 0b0111:
-            __rtenc_state->position += 1;
-            break;
-    }
-
-    sei();
-}
-
-/**
- * Interrupt for pin 2
- */
+// Interrupt for rotary encoder button presses
+// INT0 is used here so this switch can be used to wake the device up
 ISR(INT0_vect)
 {
-    _handleMove();
+    // Bail out if there's no target to recieve the action
+    if (!_current_state) return;
+
+    _current_state->button_pressed = true;
+    beeper_blip();
 }
 
-/**
- * Interrupt for pin 3
- */
-ISR(INT1_vect)
+// Interrupt for both outputs from the encoder
+//
+// We're using a pin change interrupt, so there are four interrupts for each
+// detent on the rotary encoder. This can be done with a single interrupt, but
+// the results aren't as reliable.
+ISR(PCINT2_vect)
 {
-    _handleMove();
+    // State to keep track of which way the encoder is turning
+    static uint8_t encoder_seq = 0x0;
+
+    // There should always be a target for encoder input, but bail out
+    // if it's not present to avoid clobbering anything accidentally
+    if (!_current_state) return;
+
+    encoder_seq <<= 2; // Shift last state
+    encoder_seq |= 0b11 & (PIND >> 3); // Copy PIND state (bits 3 and 4) to bits 0 and 1
+
+    // Check if the sequence of the the last four updates indicates turn
+    // The bits in each sequence indicate the state of PD4 and PD3 over time (LSBs are newer)
+    switch (encoder_seq) {
+        case 0b10000111:
+            _current_state->position -= 1;
+            beeper_blip();
+            break;
+
+        case 0b01001011:
+            _current_state->position += 1;
+            beeper_blip();
+            break;
+    }
 }

@@ -93,6 +93,7 @@ int main(void)
         }
 
         menu.cursor_pos = cursor.position;
+        cursor.button_pressed = false;
 
         u8g_FirstPage(&u8g);
         do
