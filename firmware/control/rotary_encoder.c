@@ -14,7 +14,7 @@ void rtenc_setup(void)
     PORTD |= _BV(PD2); // Pull-up for push-button
 
     EIMSK |= _BV(INT0); // Enable INT0 for push-button
-    EICRA |= _BV(ISC11); // Trigger on falling edge
+    EICRA |= _BV(ISC01); // Trigger on falling edge
 
     // Enable pin change interrupt for both rotary encoder outputs (PD3/PD4)
     PCMSK2 |= _BV(PCINT19) | _BV(PCINT20);
