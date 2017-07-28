@@ -2,10 +2,11 @@
 
 #include "rotary_encoder.h"
 #include "../beeper.h"
+#include "../main.h"
 
-// Global state where rotary encoder input should go
-// This is changed using rtenc_bind()
-static rtenc_state* _current_state;
+static EventHandler _incrementHandler;
+static EventHandler _decrementHandler;
+static EventHandler _shortPressHandler;
 
 // Set up rotary encoder pins and interrupts
 void rtenc_setup(void)
@@ -23,20 +24,20 @@ void rtenc_setup(void)
     sei(); // enable interrupts
 }
 
-// Bind all rotary encoder movements to a particular state reference
-void rtenc_bind(rtenc_state *state)
+void rtenc_bind_incr(EventHandler handler)
 {
-    _current_state = state;
+    _incrementHandler = handler;
+}
+
+void rtenc_bind_decr(EventHandler handler)
+{
+    _decrementHandler = handler;
 }
 
 // Interrupt for rotary encoder button presses
 // INT0 is used here so this switch can be used to wake the device up
 ISR(INT0_vect)
 {
-    // Bail out if there's no target to recieve the action
-    if (!_current_state) return;
-
-    _current_state->button_pressed = true;
     beeper_blip();
 }
 
@@ -50,10 +51,6 @@ ISR(PCINT2_vect)
     // State to keep track of which way the encoder is turning
     static uint8_t encoder_seq = 0x0;
 
-    // There should always be a target for encoder input, but bail out
-    // if it's not present to avoid clobbering anything accidentally
-    if (!_current_state) return;
-
     encoder_seq <<= 2; // Shift last state
     encoder_seq |= 0b11 & (PIND >> 3); // Copy PIND state (bits 3 and 4) to bits 0 and 1
 
@@ -61,12 +58,12 @@ ISR(PCINT2_vect)
     // The bits in each sequence indicate the state of PD4 and PD3 over time (LSBs are newer)
     switch (encoder_seq) {
         case 0b10000111:
-            _current_state->position -= 1;
+            eventloop_queue(&globalEventQueue, _decrementHandler);
             beeper_blip();
             break;
 
         case 0b01001011:
-            _current_state->position += 1;
+            eventloop_queue(&globalEventQueue, _incrementHandler);
             beeper_blip();
             break;
     }

@@ -4,6 +4,7 @@
  * License: MIT
  */
 
+// AVR
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <string.h>
@@ -12,6 +13,8 @@
 #include <avr/pgmspace.h>
 
 // Project
+#include "main.h"
+#include "beeper.h"
 #include "control/rotary_encoder.h"
 #include "display/menu.h"
 #include "macros.h"
@@ -19,15 +22,10 @@
 // External
 #include "u8glib/src/u8g.h"
 
-/**
- * This code was written using an Arduino mini 5V (ATmega 328p)
- * The pin and port numbers used in this code reflect the AVR pinout,
- * not the Arduino pinout. A mapping between these can be found here:
- *
- * https://www.arduino.cc/en/Hacking/PinMapping168
- */
+// C
+#include <stdbool.h>
+#include <stdlib.h>
 
-static u8g_t u8g;
 
 static const __flash char mnu_generic_back[] = "Back";
 
@@ -40,15 +38,41 @@ static const __flash char mnu_aircraftcfg_reserve[] = "Reserve time";
 static const __flash char mnu_aircraftcfg_tankrotation[] = "Tank rotation";
 static const __flash char mnu_aircraftcfg_tankbalance[] = "Tank auto-balance";
 
+// Display memory
+static u8g_t u8g;
+
+// Current draw target
+static menu_screen* activeMenu;
+
 void u8g_setup(void)
 {
     // u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);
     u8g_InitHWSPI(&u8g, &u8g_dev_ssd1306_128x64_hw_spi, PN(1,2), PN(2,1), PN(2,0));
 }
 
-void onclick(void)
+void draw_active_menu(void)
 {
+    u8g_FirstPage(&u8g);
+    do
+    {
+        menu_draw(&u8g, activeMenu);
+    } while ( u8g_NextPage(&u8g) );
+}
 
+void incrementCursor(void)
+{
+    if (activeMenu) {
+        activeMenu->cursor_pos++;
+        eventloop_queue(&globalEventQueue, &draw_active_menu);
+    }
+}
+
+void decrementCursor(void)
+{
+    if (activeMenu) {
+        activeMenu->cursor_pos--;
+        eventloop_queue(&globalEventQueue, &draw_active_menu);
+    }
 }
 
 int main(void)
@@ -61,6 +85,9 @@ int main(void)
     CLKPR = 0x80;
     CLKPR = 0x00;
 
+    eventloop_init(&globalEventQueue);
+
+    beeper_setup();
     rtenc_setup();
     u8g_setup();
 
@@ -81,27 +108,14 @@ int main(void)
         .num_items = COUNT_OF(items)
     };
 
-    rtenc_state cursor;
-    cursor.position = 0;
-    rtenc_bind(&cursor);
+    activeMenu = &menu;
+    eventloop_queue(&globalEventQueue, &draw_active_menu);
 
-    uint8_t lastPos;
+    rtenc_bind_incr(&incrementCursor);
+    rtenc_bind_decr(&decrementCursor);
 
     for (;;) {
-        if (cursor.position == lastPos) {
-            continue;
-        }
-
-        menu.cursor_pos = cursor.position;
-        cursor.button_pressed = false;
-
-        u8g_FirstPage(&u8g);
-        do
-        {
-            menu_draw(&u8g, &menu);
-        } while ( u8g_NextPage(&u8g) );
-
-        lastPos = cursor.position;
+        eventloop_run(&globalEventQueue);
     }
 
     return 0;

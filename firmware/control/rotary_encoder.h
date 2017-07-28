@@ -1,11 +1,19 @@
 #pragma once
 
-#include <stdbool.h>
+// Internal
+#include "../eventloop.h"
 
-typedef struct rtenc_state {
-	volatile uint8_t position;
-	volatile bool button_pressed;
-} rtenc_state;
-
+/**
+ * Configure interrupts and pins necessary for the encoder to work
+ */
 void rtenc_setup(void);
-void rtenc_bind(rtenc_state *state);
+
+/**
+ * Set an EventHandler to push to the event loop when the encoder is incremented
+ */
+void rtenc_bind_incr(EventHandler handler);
+
+/**
+ * Set an EventHandler to push to the event loop when the encoder is decremented
+ */
+void rtenc_bind_decr(EventHandler handler);
