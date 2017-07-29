@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 /**
- * Return the next valid index in a circular buffer of QUEUE_SIZE items
+ * Return the next index in a circular buffer of QUEUE_SIZE items
  */
 static uint8_t next_index(uint8_t index)
 {

@@ -1,8 +1,9 @@
-#include <avr/interrupt.h>
-
+// Firmware
 #include "rotary_encoder.h"
-#include "../beeper.h"
-#include "../main.h"
+#include "beeper.h"
+
+// AVR
+#include <avr/interrupt.h>
 
 static EventHandler _incrementHandler;
 static EventHandler _decrementHandler;
@@ -58,12 +59,12 @@ ISR(PCINT2_vect)
     // The bits in each sequence indicate the state of PD4 and PD3 over time (LSBs are newer)
     switch (encoder_seq) {
         case 0b10000111:
-            eventloop_queue(&globalEventQueue, _decrementHandler);
+            global_eventloop_queue(_decrementHandler);
             beeper_blip();
             break;
 
         case 0b01001011:
-            eventloop_queue(&globalEventQueue, _incrementHandler);
+            global_eventloop_queue(_incrementHandler);
             beeper_blip();
             break;
     }

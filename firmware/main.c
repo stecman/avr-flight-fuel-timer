@@ -12,15 +12,13 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
-// Project
-#include "main.h"
+// Firmware
+#include "global_eventloop.h"
+#include "display/display.h"
 #include "beeper.h"
 #include "control/rotary_encoder.h"
 #include "display/menu.h"
 #include "macros.h"
-
-// External
-#include "u8glib/src/u8g.h"
 
 // C
 #include <stdbool.h>
@@ -38,32 +36,19 @@ static const __flash char mnu_aircraftcfg_reserve[] = "Reserve time";
 static const __flash char mnu_aircraftcfg_tankrotation[] = "Tank rotation";
 static const __flash char mnu_aircraftcfg_tankbalance[] = "Tank auto-balance";
 
-// Display memory
-static u8g_t u8g;
-
 // Current draw target
 static menu_screen* activeMenu;
 
-void u8g_setup(void)
+void draw_active_menu(u8g_t* u8g)
 {
-    // u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_NO_ACK|U8G_I2C_OPT_FAST);
-    u8g_InitHWSPI(&u8g, &u8g_dev_ssd1306_128x64_hw_spi, PN(1,2), PN(2,1), PN(2,0));
-}
-
-void draw_active_menu(void)
-{
-    u8g_FirstPage(&u8g);
-    do
-    {
-        menu_draw(&u8g, activeMenu);
-    } while ( u8g_NextPage(&u8g) );
+    menu_draw(u8g, activeMenu);
 }
 
 void incrementCursor(void)
 {
     if (activeMenu) {
         activeMenu->cursor_pos++;
-        eventloop_queue(&globalEventQueue, &draw_active_menu);
+        display_mark_dirty();
     }
 }
 
@@ -71,7 +56,7 @@ void decrementCursor(void)
 {
     if (activeMenu) {
         activeMenu->cursor_pos--;
-        eventloop_queue(&globalEventQueue, &draw_active_menu);
+        display_mark_dirty();
     }
 }
 
@@ -85,11 +70,10 @@ int main(void)
     CLKPR = 0x80;
     CLKPR = 0x00;
 
-    eventloop_init(&globalEventQueue);
-
     beeper_setup();
+    display_setup();
+    global_eventloop_init();
     rtenc_setup();
-    u8g_setup();
 
     menu_item items[] = {
         { .title = mnu_generic_back },
@@ -109,13 +93,17 @@ int main(void)
     };
 
     activeMenu = &menu;
-    eventloop_queue(&globalEventQueue, &draw_active_menu);
+    display_set_renderer(&draw_active_menu);
 
     rtenc_bind_incr(&incrementCursor);
     rtenc_bind_decr(&decrementCursor);
 
     for (;;) {
-        eventloop_run(&globalEventQueue);
+        // Process any pending events
+        global_eventloop_run();
+
+        // Update the display if needed
+        display_draw();
     }
 
     return 0;

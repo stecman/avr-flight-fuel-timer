@@ -5,6 +5,7 @@
 
 #define QUEUE_SIZE 50
 
+// Event handlers take no arugments and return nothing currently
 typedef void (*EventHandler)(void);
 
 // Circular buffer for the event queue 
