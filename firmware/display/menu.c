@@ -1,6 +1,7 @@
 #include "menu.h"
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 static const uint8_t kScreenWidth = 128;
 static const uint8_t kScreenHeight = 64;
@@ -9,7 +10,9 @@ static const uint8_t kEdgePadding = 1;
 
 static const uint8_t kFontHeight = 8;
 
-// Draw a menu title at the top of the screen
+/**
+ * Draw a menu title at the top of the screen
+ */
 static inline void _draw_title(u8g_t* u8g, const menu_screen* menu)
 {
     // Draw title with a separator line underneath
@@ -17,11 +20,13 @@ static inline void _draw_title(u8g_t* u8g, const menu_screen* menu)
     u8g_DrawLine(u8g, 0, 11, kScreenWidth, 11);
 }
 
-// Draw a [current page]/[total pages] indicator at the top right of the screen
-//
-// Nothing is drawn there is only one page, or if page count exceeds 9. This
-// is an intentional limiation for now to keep this code simple. It's unlikely
-// that menus with more than 45 options will need to be used.
+/**
+ * Draw a [current page]/[total pages] indicator at the top right of the screen
+ *
+ * Nothing is drawn there is only one page, or if page count exceeds 9. This
+ * is an intentional limiation for now to keep this code simple. It's unlikely
+ * that menus with more than 45 options will need to be used.
+ */
 static inline void _draw_page_indicator(u8g_t* u8g, uint8_t currentPage, uint8_t numPages)
 {
     if (numPages > 1 && numPages < 10) {
@@ -44,9 +49,41 @@ static inline void _draw_page_indicator(u8g_t* u8g, uint8_t currentPage, uint8_t
     }
 }
 
+/**
+ * Check if a menu item is a type that has an associated value
+ */
+static bool _item_has_value(menu_item* item)
+{
+    switch (item->type) {
+        case kValueReadOnly:
+        case kValueEditable:
+        case kValueEditableToggle:
+            return true;
+    }
+
+    return false;
+}
+
+/**
+ * Draw a menu item to screen with its title and any associated value
+ *
+ * This assumes the caller has configured font and colour settings
+ */
+static void _draw_row(u8g_t* u8g, menu_item* item, uint8_t drawOffset)
+{
+    // Draw title
+    u8g_DrawStrP(u8g, kEdgePadding, drawOffset + kFontHeight, item->title);
+
+    // Draw value if there is one
+    if (_item_has_value(item)) {
+        u8g_DrawStrP(u8g, kScreenWidth - kEdgePadding - 15, drawOffset + kFontHeight, PSTR("64L"));
+    }
+}
+
 void menu_draw(u8g_t* u8g, const menu_screen* menu)
 {
     // Keep track of where we're drawing on screen
+    // This is a local zero-based index independent of the menu item index we're starting at
     uint8_t drawOffset = 0;
     uint8_t drawIndex = 0;
 
@@ -81,22 +118,22 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu)
             // Draw box
             u8g_DrawRBox(u8g, 0, drawOffset + kEdgePadding, kScreenWidth, kFontHeight, 0);
 
-            // Draw inverted title
+            // Draw inverted
             u8g_SetColorIndex(u8g, 0);
-            u8g_DrawStrP(u8g, kEdgePadding, drawOffset + kFontHeight, item->title);
+            _draw_row(u8g, item, drawOffset);
             u8g_SetColorIndex(u8g, 1);
         } else {
             // Draw regular text
-            u8g_DrawStrP(u8g, kEdgePadding, drawOffset + kFontHeight, item->title);
+            _draw_row(u8g, item, drawOffset);
         }
     }
 }
 
-char* menu_val_format_bool(int value)
+const u8g_pgm_uint8_t* menu_val_format_bool(uint8_t value)
 {
     if (value == 0) {
-        return "No";
+        return PSTR("No");
     } else {
-        return "Yes";
+        return PSTR("Yes");
     }
 }

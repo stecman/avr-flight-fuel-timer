@@ -55,4 +55,4 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu);
 /**
  * Return a human readable string for a boolean
  */
-char* menu_val_format_bool(int value);
+const u8g_pgm_uint8_t* menu_val_format_bool(uint8_t value);
