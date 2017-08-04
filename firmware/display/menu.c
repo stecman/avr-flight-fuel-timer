@@ -100,12 +100,14 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu)
     uint8_t drawOffset = 0;
     uint8_t drawIndex = 0;
 
-    // Calculate pagination
+    // Figure out what items should show on the current page
     uint8_t cursorPos = menu->cursor_pos;
     uint8_t page = cursorPos / kMaxItemsOnScreen;
-    uint8_t numPages = (menu->num_items / kMaxItemsOnScreen) + 1;
     uint8_t idxStart = page * kMaxItemsOnScreen;
     uint8_t idxEnd = idxStart + kMaxItemsOnScreen;
+
+    // Find the number of pages needed to fit num_items (effectively rounded-up integer division)
+    uint8_t numPages = ((menu->num_items + (kMaxItemsOnScreen - 1)) / kMaxItemsOnScreen);
 
     // Keep menu selection within the number of available items
     if (idxEnd >= menu->num_items) {
