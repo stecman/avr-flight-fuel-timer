@@ -25,16 +25,17 @@
 #include <stdlib.h>
 
 
-static const __flash char mnu_generic_back[] = "Back";
+static const __flash char pstr_generic_back[] = "Back";
 
-static const __flash char mnu_aircraftcfg_title[] = "Aircraft config";
-static const __flash char mnu_aircraftcfg_save[] = "Load / store";
-static const __flash char mnu_aircraftcfg_burn_cruise[] = "Fuel burn cruise";
-static const __flash char mnu_aircraftcfg_burn_taxi[] = "Fuel burn taxi";
-static const __flash char mnu_aircraftcfg_xfeed[] = "Crossfeed avail.";
-static const __flash char mnu_aircraftcfg_reserve[] = "Reserve time";
-static const __flash char mnu_aircraftcfg_tankrotation[] = "Tank rotation";
-static const __flash char mnu_aircraftcfg_tankbalance[] = "Tank auto-balance";
+// Aircraft config menu
+static const __flash char pstr_aircraftcfg_title[] = "Aircraft config";
+static const __flash char pstr_aircraftcfg_save[] = "Load / store";
+static const __flash char pstr_aircraftcfg_burn_cruise[] = "Fuel burn cruise";
+static const __flash char pstr_aircraftcfg_burn_taxi[] = "Fuel burn taxi";
+static const __flash char pstr_aircraftcfg_xfeed[] = "Crossfeed avail.";
+static const __flash char pstr_aircraftcfg_reserve[] = "Reserve time";
+static const __flash char pstr_aircraftcfg_tankrotation[] = "Tank rotation";
+static const __flash char pstr_aircraftcfg_tankbalance[] = "Tank auto-balance";
 
 // Current draw target
 static menu_screen* activeMenu;
@@ -76,18 +77,42 @@ int main(void)
     rtenc_setup();
 
     menu_item items[] = {
-        { .title = mnu_generic_back },
-        { .title = mnu_aircraftcfg_save },
-        { .title = mnu_aircraftcfg_burn_cruise },
-        { .title = mnu_aircraftcfg_burn_taxi },
-        { .title = mnu_aircraftcfg_xfeed },
-        { .title = mnu_aircraftcfg_reserve },
-        { .title = mnu_aircraftcfg_tankrotation },
-        { .title = mnu_aircraftcfg_tankbalance },
+        {
+            .title = pstr_generic_back,
+            .type  = kFunctionCall,
+        },
+        {
+            .title = pstr_aircraftcfg_save,
+            .type = kFunctionCall,
+        },
+        {
+            .title = pstr_aircraftcfg_burn_cruise,
+            .type = kFunctionCall,
+        },
+        {
+            .title = pstr_aircraftcfg_burn_taxi,
+            .type = kValueEditable,
+        },
+        {
+            .title = pstr_aircraftcfg_xfeed,
+            .type = kValueEditable,
+        },
+        {
+            .title = pstr_aircraftcfg_reserve,
+            .type = kValueEditable,
+        },
+        {
+            .title = pstr_aircraftcfg_tankrotation,
+            .type = kValueEditable,
+        },
+        {
+            .title = pstr_aircraftcfg_tankbalance,
+            .type = kValueEditableToggle,
+        },
     };
 
     menu_screen menu = {
-        .title = mnu_aircraftcfg_title,
+        .title = pstr_aircraftcfg_title,
         .items = &items,
         .num_items = COUNT_OF(items)
     };
