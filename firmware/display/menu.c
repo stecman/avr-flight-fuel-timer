@@ -80,6 +80,19 @@ static void _draw_row(u8g_t* u8g, menu_item* item, uint8_t drawOffset)
     }
 }
 
+void menu_wrap_cursor_pos(menu_screen* menu)
+{
+    // Treat 255 as a special case of "value below lower limit"
+    if (menu->cursor_pos == 0xFF) {
+        menu->cursor_pos = menu->num_items - 1;
+    }
+
+    // Wrap upper bound to zero
+    else if (menu->cursor_pos > menu->num_items - 1) {
+        menu->cursor_pos = 0;
+    }
+}
+
 void menu_draw(u8g_t* u8g, const menu_screen* menu)
 {
     // Keep track of where we're drawing on screen
@@ -88,7 +101,7 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu)
     uint8_t drawIndex = 0;
 
     // Calculate pagination
-    uint8_t cursorPos = (menu->cursor_pos % menu->num_items);
+    uint8_t cursorPos = menu->cursor_pos;
     uint8_t page = cursorPos / kMaxItemsOnScreen;
     uint8_t numPages = (menu->num_items / kMaxItemsOnScreen) + 1;
     uint8_t idxStart = page * kMaxItemsOnScreen;

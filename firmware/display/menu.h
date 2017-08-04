@@ -48,7 +48,15 @@ typedef struct menu_screen {
 } menu_screen;
 
 /**
- * Draw the given menu to screen
+ * Keep the cursor position of a menu within bounds of 0 to menu->num_items
+ */
+void menu_wrap_cursor_pos(menu_screen* menu);
+
+/**
+ * Draw a menu to screen
+ *
+ * Note that the cursor position is expected to be kept in the bounds of
+ * 0 ... [num_items] by the calling code (menu_wrap_cursor_pos() can help)
  */
 void menu_draw(u8g_t* u8g, const menu_screen* menu);
 

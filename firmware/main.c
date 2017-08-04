@@ -49,6 +49,7 @@ void incrementCursor(void)
 {
     if (activeMenu) {
         activeMenu->cursor_pos++;
+        menu_wrap_cursor_pos(activeMenu);
         display_mark_dirty();
     }
 }
@@ -57,6 +58,7 @@ void decrementCursor(void)
 {
     if (activeMenu) {
         activeMenu->cursor_pos--;
+        menu_wrap_cursor_pos(activeMenu);
         display_mark_dirty();
     }
 }
