@@ -1,24 +1,18 @@
-/* Name: main.c
- * Author: Stephen Holdaway <stephen@stecman.co.nz>
- * Date: 25 June, 2016
- * License: MIT
- */
-
 // AVR
+#include <avr/interrupt.h>
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include <avr/wdt.h>
 #include <string.h>
 #include <util/delay.h>
-#include <avr/interrupt.h>
-#include <avr/pgmspace.h>
 
 // Firmware
-#include "global_eventloop.h"
-#include "display/display.h"
 #include "beeper.h"
 #include "control/rotary_encoder.h"
+#include "display/display.h"
 #include "display/menu.h"
 #include "macros.h"
+#include "system.h"
 
 // C
 #include <stdbool.h>

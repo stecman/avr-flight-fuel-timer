@@ -1,10 +1,9 @@
-// Firmware
 #include "rotary_encoder.h"
 #include "beeper.h"
 
-// AVR
 #include <avr/interrupt.h>
 
+#include "system.h"
 static EventHandler _incrementHandler;
 static EventHandler _decrementHandler;
 static EventHandler _shortPressHandler;

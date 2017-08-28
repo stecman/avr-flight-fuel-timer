@@ -1,7 +1,6 @@
 #pragma once
 
-// Firmware
-#include "global_eventloop.h"
+#include "eventloop.h"
 
 /**
  * Configure interrupts and pins necessary for the encoder to work
