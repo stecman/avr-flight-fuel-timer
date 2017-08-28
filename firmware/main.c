@@ -25,18 +25,6 @@
 #include <stdlib.h>
 
 
-static const __flash char pstr_generic_back[] = "Back";
-
-// Aircraft config menu
-static const __flash char pstr_aircraftcfg_title[] = "Aircraft config";
-static const __flash char pstr_aircraftcfg_save[] = "Load / store";
-static const __flash char pstr_aircraftcfg_burn_cruise[] = "Fuel burn cruise";
-static const __flash char pstr_aircraftcfg_burn_taxi[] = "Fuel burn taxi";
-static const __flash char pstr_aircraftcfg_xfeed[] = "Crossfeed avail.";
-static const __flash char pstr_aircraftcfg_reserve[] = "Reserve time";
-static const __flash char pstr_aircraftcfg_tankrotation[] = "Tank rotation";
-static const __flash char pstr_aircraftcfg_tankbalance[] = "Tank auto-balance";
-
 // Current draw target
 static menu_screen* activeMenu;
 

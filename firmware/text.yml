@@ -1,0 +1,41 @@
+# This defines progmem strings for the firmware
+#
+# Use ./scripts/build_text.py to build this into text.h and text.c
+#
+# This is generated from YAML as progmem strings have to be defined and declared
+# separately in a header and source file to prevent duplicate strings in program
+# memory for each file that uses one of these progmem variables. It's tedious to
+# manage those two files manually (since they share a lot of content), so the
+# files are generated using Python instead.
+#
+# Key names are used as variable names, so must be valid C99 variable names. Values
+# are escaped and wrapped in quotes unless they start with a double quote.
+#
+# Strings that start with a literal double quote (") will be put in the generated
+# files verbatim. This allows for use of pre-processor macros/defines in strings.
+
+# Generic / system-wide strings
+pstr_generic_back: Back
+
+# Build-time defined strings
+pstr_build_version: '"Ver. " VERSION_STR'
+pstr_build_date: '"Built " BUILD_DATE_STR'
+
+# Root menu
+pstr_root_menu_title: '"Fuel Timer (" VERSION_STR ")"'
+
+# Fuel loading menu
+pstr_fuelload_title: Fuel loading
+
+# History / log menu
+pstr_log_title: Flight log
+
+# Aircraft config menu
+pstr_aircraftcfg_title: Aircraft config
+pstr_aircraftcfg_save: Load / store
+pstr_aircraftcfg_burn_cruise: Fuel burn cruise
+pstr_aircraftcfg_burn_taxi: Fuel burn taxi
+pstr_aircraftcfg_xfeed: Crossfeed avail.
+pstr_aircraftcfg_reserve: Reserve time
+pstr_aircraftcfg_tankrotation: Tank rotation
+pstr_aircraftcfg_tankbalance: Tank auto-balance
