@@ -13,37 +13,11 @@
 #include "display/menu.h"
 #include "macros.h"
 #include "system.h"
+#include "views/menu_root.h"
 
 // C
 #include <stdbool.h>
 #include <stdlib.h>
-
-
-// Current draw target
-static menu_screen* activeMenu;
-
-void draw_active_menu(u8g_t* u8g)
-{
-    menu_draw(u8g, activeMenu);
-}
-
-void incrementCursor(void)
-{
-    if (activeMenu) {
-        activeMenu->cursor_pos++;
-        menu_wrap_cursor_pos(activeMenu);
-        display_mark_dirty();
-    }
-}
-
-void decrementCursor(void)
-{
-    if (activeMenu) {
-        activeMenu->cursor_pos--;
-        menu_wrap_cursor_pos(activeMenu);
-        display_mark_dirty();
-    }
-}
 
 int main(void)
 {
@@ -55,57 +29,14 @@ int main(void)
     CLKPR = 0x80;
     CLKPR = 0x00;
 
+    // Initialise pins and state
     beeper_setup();
     display_setup();
-    global_eventloop_init();
     rtenc_setup();
+    global_eventloop_init();
 
-    menu_item items[] = {
-        {
-            .title = pstr_generic_back,
-            .type  = kFunctionCall,
-        },
-        {
-            .title = pstr_aircraftcfg_save,
-            .type = kFunctionCall,
-        },
-        {
-            .title = pstr_aircraftcfg_burn_cruise,
-            .type = kFunctionCall,
-        },
-        {
-            .title = pstr_aircraftcfg_burn_taxi,
-            .type = kValueEditable,
-        },
-        {
-            .title = pstr_aircraftcfg_xfeed,
-            .type = kValueEditable,
-        },
-        {
-            .title = pstr_aircraftcfg_reserve,
-            .type = kValueEditable,
-        },
-        {
-            .title = pstr_aircraftcfg_tankrotation,
-            .type = kValueEditable,
-        },
-        {
-            .title = pstr_aircraftcfg_tankbalance,
-            .type = kValueEditableToggle,
-        },
-    };
-
-    menu_screen menu = {
-        .title = pstr_aircraftcfg_title,
-        .items = &items,
-        .num_items = COUNT_OF(items)
-    };
-
-    activeMenu = &menu;
-    display_set_renderer(&draw_active_menu);
-
-    rtenc_bind_incr(&incrementCursor);
-    rtenc_bind_decr(&decrementCursor);
+    // Set the root view
+    global_viewstack_init(&view_menu_root);
 
     for (;;) {
         // Process any pending events

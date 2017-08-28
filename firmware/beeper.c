@@ -17,3 +17,9 @@ void beeper_blip()
     PORTC &= ~_BV(PC2);
 }
 
+void beeper_beep_long(void)
+{
+    PORTC |= _BV(PC2);
+    _delay_ms(50);
+    PORTC &= ~_BV(PC2);
+}

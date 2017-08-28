@@ -1,12 +1,12 @@
 #include "rotary_encoder.h"
-#include "beeper.h"
 
 #include <avr/interrupt.h>
 
 #include "system.h"
-static EventHandler _incrementHandler;
-static EventHandler _decrementHandler;
-static EventHandler _shortPressHandler;
+
+EventHandler _incrementHandler;
+EventHandler _decrementHandler;
+EventHandler _shortPressHandler;
 
 // Set up rotary encoder pins and interrupts
 void rtenc_setup(void)
@@ -34,11 +34,18 @@ void rtenc_bind_decr(EventHandler handler)
     _decrementHandler = handler;
 }
 
+void rtenc_bind_short_press(EventHandler handler)
+{
+    _shortPressHandler = handler;
+}
+
 // Interrupt for rotary encoder button presses
 // INT0 is used here so this switch can be used to wake the device up
 ISR(INT0_vect)
 {
-    beeper_blip();
+    if (_shortPressHandler) {
+        global_eventloop_queue(_shortPressHandler);
+    }
 }
 
 // Interrupt for both outputs from the encoder
@@ -59,12 +66,10 @@ ISR(PCINT2_vect)
     switch (encoder_seq) {
         case 0b10000111:
             global_eventloop_queue(_decrementHandler);
-            beeper_blip();
             break;
 
         case 0b01001011:
             global_eventloop_queue(_incrementHandler);
-            beeper_blip();
             break;
     }
 }

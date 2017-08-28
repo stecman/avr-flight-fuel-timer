@@ -33,4 +33,4 @@ void display_set_renderer(Renderer renderer);
  *
  * @see display_set_renderer()
  */
-void display_draw();
+void display_draw(void);

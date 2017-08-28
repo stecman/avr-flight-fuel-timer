@@ -52,7 +52,7 @@ static inline void _draw_page_indicator(u8g_t* u8g, uint8_t currentPage, uint8_t
 /**
  * Check if a menu item is a type that has an associated value
  */
-static bool _item_has_value(menu_item* item)
+static bool _item_has_value(const menu_item* item)
 {
     switch (item->type) {
         case kValueReadOnly:
@@ -69,7 +69,7 @@ static bool _item_has_value(menu_item* item)
  *
  * This assumes the caller has configured font and colour settings
  */
-static void _draw_row(u8g_t* u8g, menu_item* item, uint8_t drawOffset)
+static void _draw_row(u8g_t* u8g, const menu_item* item, uint8_t drawOffset)
 {
     // Draw title
     u8g_DrawStrP(u8g, kEdgePadding, drawOffset + kFontHeight, item->title);
@@ -82,6 +82,11 @@ static void _draw_row(u8g_t* u8g, menu_item* item, uint8_t drawOffset)
 
 void menu_wrap_cursor_pos(menu_screen* menu)
 {
+    // Bail out there are no items (we can't do anything useful)
+    if (menu->num_items == 0) {
+        return;
+    }
+
     // Treat 255 as a special case of "value below lower limit"
     if (menu->cursor_pos == 0xFF) {
         menu->cursor_pos = menu->num_items - 1;
@@ -93,11 +98,25 @@ void menu_wrap_cursor_pos(menu_screen* menu)
     }
 }
 
+void menu_init(menu_screen* menu)
+{
+    menu->cursor_pos = 0;
+}
+
+const menu_item* menu_get_current_item(menu_screen* menu)
+{
+    if (menu->num_items == 0) {
+        return NULL;
+    }
+
+    return &((menu->items)[menu->cursor_pos]);
+}
 void menu_draw(u8g_t* u8g, const menu_screen* menu)
 {
     // Keep track of where we're drawing on screen
-    // This is a local zero-based index independent of the menu item index we're starting at
     uint8_t drawOffset = 0;
+
+    // Local, zero-based index (offset from a point in menu->items)
     uint8_t drawIndex = 0;
 
     // Figure out what items should show on the current page

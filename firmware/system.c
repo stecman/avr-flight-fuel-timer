@@ -22,3 +22,49 @@ void global_eventloop_run(void)
 {
     eventloop_run(&_eventQueue);
 }
+
+
+// Internal view stack for global_* viewstack functions
+static ViewStack _viewStack;
+
+void global_viewstack_init(ViewStackFrame* rootView)
+{
+    viewstack_init(&_viewStack, rootView);
+}
+
+ViewStackFrame* global_viewstack_pop(void)
+{
+    return viewstack_pop(&_viewStack);
+}
+
+void global_viewstack_pop_silent(void)
+{
+    viewstack_pop(&_viewStack);
+}
+
+bool global_viewstack_push(ViewStackFrame* view)
+{
+    return viewstack_push(&_viewStack, view);
+}
+
+void global_viewstack_replace(ViewStackFrame* view)
+{
+    viewstack_replace(&_viewStack, view);
+}
+
+
+// Menu handling
+void global_handle_menu_select(menu_item* item)
+{
+    if (item == NULL) {
+        return;
+    }
+
+    switch (item->type) {
+        case kFunctionCall:
+            if (item->onClick != NULL) {
+                item->onClick();
+            }
+            break;
+    }
+}

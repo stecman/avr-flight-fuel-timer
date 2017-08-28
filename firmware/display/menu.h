@@ -32,8 +32,12 @@ typedef enum MenuItemType {
  */
 typedef struct menu_item {
     const u8g_pgm_uint8_t *title;
-    char* (*get_value)(void);
-    void (*on_click)(void);
+
+    // Handlers for different menu item modes
+    char* (*getValue)(void);
+    void (*onClick)(void);
+
+    // Specify how this menu item should behave with interaction
     MenuItemType type;
 } menu_item;
 
@@ -47,10 +51,21 @@ typedef struct menu_screen {
     uint8_t cursor_pos;
 } menu_screen;
 
+
 /**
  * Keep the cursor position of a menu within bounds of 0 to menu->num_items
  */
 void menu_wrap_cursor_pos(menu_screen* menu);
+
+/**
+ * Reset a menu's state to default
+ */
+void menu_init(menu_screen* menu);
+
+/**
+ * Return the item that is currently selected
+ */
+const menu_item* menu_get_current_item(menu_screen* menu);
 
 /**
  * Draw a menu to screen
