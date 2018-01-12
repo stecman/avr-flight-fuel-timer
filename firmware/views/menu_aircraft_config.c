@@ -75,17 +75,15 @@ static void viewWillMount(void)
 
 static void handleIncrement(void)
 {
-    _menu.cursor_pos++;
+    menu_move_cursor_relative(&_menu, +1);
     beeper_blip();
-    menu_wrap_cursor_pos(&_menu);
     display_mark_dirty();
 }
 
 static void handleDecrement(void)
 {
-    _menu.cursor_pos--;
+    menu_move_cursor_relative(&_menu, -1);
     beeper_blip();
-    menu_wrap_cursor_pos(&_menu);
     display_mark_dirty();
 }
 

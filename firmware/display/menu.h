@@ -51,11 +51,13 @@ typedef struct menu_screen {
     uint8_t cursor_pos;
 } menu_screen;
 
-
 /**
- * Keep the cursor position of a menu within bounds of 0 to menu->num_items
+ * Move a menu's cursor up (delta = -1) or down (delta = 1)
+ *
+ * The cursor is wrapped to the first/last menu item if the goes out of bounds.
+ * A delta not in the set {1,-1} is not allowed (undefined)
  */
-void menu_wrap_cursor_pos(menu_screen* menu);
+void menu_move_cursor_relative(menu_screen* menu, int8_t delta);
 
 /**
  * Reset a menu's state to default

@@ -80,7 +80,10 @@ static void _draw_row(u8g_t* u8g, const menu_item* item, uint8_t drawOffset)
     }
 }
 
-void menu_wrap_cursor_pos(menu_screen* menu)
+/**
+ * Keep the cursor position of a menu within bounds of 0 to menu->num_items
+ */
+static void _wrap_cursor_pos(menu_screen* menu)
 {
     // Bail out there are no items (we can't do anything useful)
     if (menu->num_items == 0) {
@@ -96,6 +99,12 @@ void menu_wrap_cursor_pos(menu_screen* menu)
     else if (menu->cursor_pos > menu->num_items - 1) {
         menu->cursor_pos = 0;
     }
+}
+
+void menu_move_cursor_relative(menu_screen* menu, int8_t delta)
+{
+    menu->cursor_pos += delta;
+    _wrap_cursor_pos(menu);
 }
 
 void menu_init(menu_screen* menu)
