@@ -120,6 +120,7 @@ const menu_item* menu_get_current_item(menu_screen* menu)
 
     return &((menu->items)[menu->cursor_pos]);
 }
+
 void menu_draw(u8g_t* u8g, const menu_screen* menu)
 {
     // Keep track of where we're drawing on screen
@@ -143,7 +144,7 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu)
     }
 
     // Ensure the menu font is in use
-    u8g_SetFont(u8g, u8g_font_5x8);
+    u8g_SetFont(u8g, u8g_font_5x8r);
 
     _draw_title(u8g, menu);
     _draw_page_indicator(u8g, page, numPages);
