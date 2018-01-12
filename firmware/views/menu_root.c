@@ -6,29 +6,20 @@
 #include "macros.h"
 #include "system.h"
 #include "text.h"
+#include "views/menu_shared.h"
 
 #include "views/menu_aircraft_config.h"
-
-#define NUM_ITEMS 4
 
 static void openAircraftConfig(void)
 {
     global_viewstack_push(&view_menu_aircraft_config);
 }
 
-static menu_item _items[NUM_ITEMS];
 static menu_screen _menu;
 
-// Set up menu memory
-//
-// Doing this with memcpy ends up smaller than assigning each index of the menu
-// items array to a specific value. This is also slightly more readable.
-static void _init(void)
+// Populate shared menu item memory
+static inline void _populate_menu(void)
 {
-    if (_menu.num_items != 0) {
-        return;
-    }
-
     const menu_item default_items[] = {
         {
             .title = pstr_generic_back,
@@ -50,18 +41,20 @@ static void _init(void)
         },
     };
 
-    memcpy(_items, default_items, sizeof(default_items));
-
-    _menu.title = pstr_root_menu_title;
-    _menu.items = &_items;
-    _menu.num_items = NUM_ITEMS;
+    _menu.items = populate_shared_menu(default_items, COUNT_OF(default_items));
+    _menu.num_items = COUNT_OF(default_items);
 }
 
 static void viewWillMount(void)
 {
-    _init();
+    // Set up menu memory
     menu_init(&_menu);
-    beeper_beep_long();
+    _menu.title = pstr_root_menu_title;
+}
+
+static void viewWillFocus(void)
+{
+    _populate_menu();
 }
 
 static void handleIncrement(void)
@@ -93,7 +86,7 @@ static void render(u8g_t* u8g)
 
 ViewStackFrame view_menu_root = {
     .frameWillMount = &viewWillMount,
-    .frameWillGetFocus = NULL,
+    .frameWillGetFocus = &viewWillFocus,
     .handleIncrement = &handleIncrement,
     .handleDecrement = &handleDecrement,
     .handleShortPress = &handleShortPress,
