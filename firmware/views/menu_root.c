@@ -96,6 +96,7 @@ static void render(u8g_t* u8g)
 
 ViewStackFrame view_menu_root = {
     .frameWillMount = &viewWillMount,
+    .frameWillGetFocus = NULL,
     .handleIncrement = &handleIncrement,
     .handleDecrement = &handleDecrement,
     .handleShortPress = &handleShortPress,

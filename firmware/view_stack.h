@@ -8,9 +8,14 @@
 #define VIEWSTACK_SIZE 10
 
 typedef struct ViewStackFrame {
-    // Callback: called when this frame is about to become the current frame
-    // Use to reset any static state the view has. Called before drawing.
+    // Callback: called when this frame is about to be added to the stack for
+    // the first time. Use to initialise any state the view has.
+    // Called before drawing.
     void (*frameWillMount)(void);
+
+    // Callback: called each time this frame is about to become visible
+    // Called before drawing. Called after frameWillMount.
+    void (*frameWillGetFocus)(void);
 
     // User input event handlers
     // The top view currently always recieves all input

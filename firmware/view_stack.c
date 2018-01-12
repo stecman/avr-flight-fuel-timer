@@ -1,10 +1,19 @@
 #include "view_stack.h"
 
-// Activate a view (prepare, bind and render)
-static void viewstack_make_active(ViewStackFrame* view)
+/**
+ * Activate a view (prepare, bind and render)
+ *
+ * @param isFirstMount - signal to the view that it's new (not just focused)
+ */
+static void viewstack_make_active(ViewStackFrame* view, bool isFirstMount)
 {
-    if (view->frameWillMount != NULL) {
+    // Prepare view
+    if (isFirstMount && view->frameWillMount != NULL) {
         view->frameWillMount();
+    }
+
+    if (view->frameWillGetFocus != NULL) {
+        view->frameWillGetFocus();
     }
 
     // Bind input controls
@@ -46,7 +55,7 @@ void viewstack_init(ViewStack* vs, ViewStackFrame* rootView)
 {
     vs->top = 0;
     _set_top_frame(vs, rootView);
-    viewstack_make_active(rootView);
+    viewstack_make_active(rootView, true);
 }
 
 ViewStackFrame* viewstack_pop(ViewStack* vs)
@@ -63,7 +72,7 @@ ViewStackFrame* viewstack_pop(ViewStack* vs)
     // Decrement top and activate the next view in the stack
     // The old pointer isn't cleaned up or nulled as all views are assumed to be static
     --(vs->top);
-    viewstack_make_active(_get_top_frame(vs));
+    viewstack_make_active(_get_top_frame(vs), false);
     
     return oldView;
 }
@@ -78,7 +87,7 @@ bool viewstack_push(ViewStack* vs, ViewStackFrame* view)
    // Add to the top of the stack and activate
    ++(vs->top);
    _set_top_frame(vs, view);
-   viewstack_make_active(view);
+   viewstack_make_active(view, true);
 
    return true;
 }
@@ -89,5 +98,5 @@ void viewstack_replace(ViewStack* vs, ViewStackFrame* view)
 
     // Replace the current top item with the passed view
     _set_top_frame(vs, view);
-    viewstack_make_active(view);
+    viewstack_make_active(view, true);
 }
