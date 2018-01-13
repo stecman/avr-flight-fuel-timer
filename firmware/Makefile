@@ -17,6 +17,10 @@ COMPILE += -std=gnu99 -Wstrict-prototypes
 # Enable coloured output from avr-gcc
 COMPILE += -fdiagnostics-color=always
 
+# Expose strings in source
+COMPILE += -DVERSION_STR="\"$(shell git describe --always)\""
+COMPILE += -DBUILD_DATE_STR="\"$(shell date '+%Y-%m-%d %H:%M')\""
+
 # symbolic targets:
 all: $(SOURCES) main.hex
 
