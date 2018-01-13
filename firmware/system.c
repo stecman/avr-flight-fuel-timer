@@ -54,7 +54,7 @@ void global_viewstack_replace(ViewStackFrame* view)
 
 
 // Menu handling
-void global_handle_menu_select(menu_item* item)
+void global_handle_menu_select(const menu_item* item)
 {
     if (item == NULL) {
         return;
