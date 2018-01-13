@@ -7,19 +7,32 @@ AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
 SOURCES = $(shell find . -name '*.c' -and -not -name text.c) text.c
 OBJECTS = $(SOURCES:.c=.o)
 
-COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
-COMPILE += -I -I. -I$(shell pwd) -I./lib/
-COMPILE += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
-COMPILE += -ffunction-sections -fdata-sections -Wl,--gc-sections
-COMPILE += -Wl,--relax -mcall-prologues
-COMPILE += -std=gnu99 -Wstrict-prototypes
+# Automatic dependency resolution
+DEPDIR := .d
+$(shell mkdir -p $(DEPDIR) >/dev/null)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
+
+# Compiler flags
+CFLAGS = -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
+CFLAGS += -I -I. -I$(shell pwd) -I./lib/
+CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
+CFLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections
+CFLAGS += -Wl,--relax -mcall-prologues
+CFLAGS += -std=gnu99 -Wstrict-prototypes
+
+# Specfic warnings as errors
+CFLAGS += -Werror=return-type
 
 # Enable coloured output from avr-gcc
-COMPILE += -fdiagnostics-color=always
+CFLAGS += -fdiagnostics-color=always
 
 # Expose strings in source
-COMPILE += -DVERSION_STR="\"$(shell git describe --always)\""
-COMPILE += -DBUILD_DATE_STR="\"$(shell date '+%Y-%m-%d %H:%M')\""
+CFLAGS += -DVERSION_STR="\"$(shell git describe --always)\""
+CFLAGS += -DBUILD_DATE_STR="\"$(shell date '+%Y-%m-%d %H:%M')\""
+
+COMPILE = avr-gcc $(DEPFLAGS) $(CFLAGS)
+
+POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 # symbolic targets:
 all: $(SOURCES) main.hex
@@ -28,8 +41,10 @@ text.c: text.yml scripts/build_text.py
 	# Build a file of progmem strings
 	./scripts/build_text.py text.yml
 
-.c.o:
+.c.o: $(DEPDIR)/%.d
+	@mkdir -p "$(DEPDIR)/$(shell dirname $@)"
 	$(COMPILE) -c $< -o $@
+	$(POSTCOMPILE)
 
 .S.o:
 	$(COMPILE) -x assembler-with-cpp -c $< -o $@
@@ -57,6 +72,9 @@ clean:
 	# Remove binaries
 	rm -f main.hex main.elf
 
+	# Remove dependency tracking files
+	rm -rf "$(DEPDIR)"
+
 main.elf: $(OBJECTS)
 	$(COMPILE) -o main.elf $(OBJECTS)
 
@@ -68,5 +86,7 @@ main.hex: main.elf
 disasm:	main.elf
 	avr-objdump -d main.elf
 
-cpp:
-	$(COMPILE) -E main.c
+$(DEPDIR)/%.d: ;
+.PRECIOUS: $(DEPDIR)/%.d
+
+include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SOURCES))))
