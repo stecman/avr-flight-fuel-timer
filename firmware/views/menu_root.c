@@ -9,10 +9,16 @@
 #include "views/menu_shared.h"
 
 #include "views/menu_aircraft_config.h"
+#include "views/flight_main.h"
 
-static void openAircraftConfig(void)
+static void openAircraftConfigView(void)
 {
     global_viewstack_push(&view_menu_aircraft_config);
+}
+
+static void handleStartFlight(void)
+{
+    global_viewstack_push(&view_flight_main);
 }
 
 static menu_screen _menu;
@@ -22,21 +28,17 @@ static inline void _populate_menu(void)
 {
     const menu_item default_items[] = {
         {
-            .title = pstr_generic_back,
-            .onClick = &global_viewstack_pop_silent,
-            .type = kFunctionCall,
-        },
-        {
             .title = pstr_fuelload_title,
             .type = kFunctionCall,
         },
         {
-            .title = pstr_log_title,
+            .title = pstr_aircraftcfg_title,
+            .onClick = &openAircraftConfigView,
             .type = kFunctionCall,
         },
         {
-            .title = pstr_aircraftcfg_title,
-            .onClick = &openAircraftConfig,
+            .title = pstr_generic_start_flight,
+            .onClick = &handleStartFlight,
             .type = kFunctionCall,
         },
     };
