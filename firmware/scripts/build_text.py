@@ -30,6 +30,12 @@ def get_pstring_code(varName, value=None):
 
     return 'const __flash uint8_t %s[] = %s;\n' % (varName, value)
 
+def get_metadata_code(varName, value):
+    """ Generate C code to define metadata for a progmem string """
+
+    return 'static const uint8_t len_%s = %d;\n' % (varName, len(value))
+
+
 comment_template = """
 /**
  * This file is generated from {yaml_file}. Do not edit it directly.
@@ -64,6 +70,10 @@ if __name__ == "__main__":
         for var, value in data.iteritems():
             header.write(get_pstring_code(var))
             implementation.write(get_pstring_code(var, value))
+
+        # Add string length information
+        for var, value in data.iteritems():
+            header.write(get_metadata_code(var, value))
 
     finally:
         if header:

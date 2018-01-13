@@ -24,7 +24,7 @@ COMPILE += -DBUILD_DATE_STR="\"$(shell date '+%Y-%m-%d %H:%M')\""
 # symbolic targets:
 all: $(SOURCES) main.hex
 
-text.c: text.yml
+text.c: text.yml scripts/build_text.py
 	# Build a file of progmem strings
 	./scripts/build_text.py text.yml
 
