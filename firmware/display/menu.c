@@ -15,8 +15,21 @@ static const uint8_t kFontHeight = 8;
  */
 static inline void _draw_title(u8g_t* u8g, const menu_screen* menu)
 {
-    // Draw title with a separator line underneath
-    u8g_DrawStrP(u8g, 0, 8, menu->title);
+    uint8_t titleOffsetX = 0;
+
+    if (menu->icon_xbm != NULL) {
+        uint8_t width = menu->icon_dimensions >> 4;
+        uint8_t height = menu->icon_dimensions & 0x0F;
+
+        // Draw icon anchored to the baseline of the text
+        u8g_DrawXBMP(u8g, 5 - width, kFontHeight - height, width, height, menu->icon_xbm);
+
+        // Enough spacing for the icon to not look like it's part of the title text
+        titleOffsetX = 9;
+    }
+
+    // Draw title with a separator line for the header underneath
+    u8g_DrawStrP(u8g, titleOffsetX, kFontHeight, menu->title);
     u8g_DrawLine(u8g, 0, 11, kScreenWidth, 11);
 }
 

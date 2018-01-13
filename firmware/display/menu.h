@@ -49,6 +49,13 @@ typedef struct menu_screen {
     const menu_item* items;
     uint8_t num_items;
     uint8_t cursor_pos;
+
+    // Pointer to icon in program memory
+    // If this is NULL, no icon will be drawn
+    const u8g_pgm_uint8_t *icon_xbm;
+
+    // Icon dimensions as a pair of four-bit numbers
+    uint8_t icon_dimensions;
 } menu_screen;
 
 /**

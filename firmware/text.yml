@@ -23,7 +23,7 @@ pstr_build_version: '"Ver. " VERSION_STR'
 pstr_build_date: '"Built " BUILD_DATE_STR'
 
 # Root menu
-pstr_root_menu_title: '"Fuel Timer  (" VERSION_STR ")"'
+pstr_root_menu_title: '"Fuel Timer (" VERSION_STR ")"'
 
 # Fuel loading menu
 pstr_fuelload_title: Fuel loading

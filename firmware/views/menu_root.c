@@ -2,6 +2,7 @@
 
 #include "beeper.h"
 #include "display/display.h"
+#include "display/icons.h"
 #include "display/menu.h"
 #include "macros.h"
 #include "system.h"
@@ -52,6 +53,8 @@ static void viewWillMount(void)
     // Set up menu memory
     menu_init(&_menu);
     _menu.title = pstr_root_menu_title;
+    _menu.icon_xbm = icon_plane_5x5;
+    _menu.icon_dimensions = icon_dimensions_plane;
 }
 
 static void viewWillFocus(void)
