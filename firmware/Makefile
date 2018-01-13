@@ -1,10 +1,12 @@
-DEVICE     = atmega328p
-CLOCK      = 16000000
+DEVICE = atmega328p
+CLOCK  = 16000000
 PROGRAMMER = -c arduino -P /dev/ttyUSB0 -b57600
-SOURCES    = $(shell find -name '*.c')
-OBJECTS    = $(SOURCES:.c=.o)
 
 AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
+
+SOURCES = $(shell find . -name '*.c' -and -not -name text.c) text.c
+OBJECTS = $(SOURCES:.c=.o)
+
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 COMPILE += -I -I. -I$(shell pwd) -I./lib/
 COMPILE += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
@@ -17,6 +19,10 @@ COMPILE += -fdiagnostics-color=always
 
 # symbolic targets:
 all: $(SOURCES) main.hex
+
+text.c: text.yml
+	# Build a file of progmem strings
+	./scripts/build_text.py text.yml
 
 .c.o:
 	$(COMPILE) -c $< -o $@
@@ -31,15 +37,20 @@ all: $(SOURCES) main.hex
 .c.s:
 	$(COMPILE) -S $< -o $@
 
-flash:	all
+flash: all
 	$(AVRDUDE) -U flash:w:main.hex:i
 
 # Xcode uses the Makefile targets "", "clean" and "install"
 install: flash
 
 clean:
-	find -name '*.d' -exec rm {} +
-	find -name '*.o' -exec rm {} +
+	# Remove intermediates
+	find . -name '*.d' -or -name '*.o' -exec rm {} +
+
+	# Remove generated files
+	rm -f text.c text.h
+
+	# Remove binaries
 	rm -f main.hex main.elf
 
 main.elf: $(OBJECTS)
