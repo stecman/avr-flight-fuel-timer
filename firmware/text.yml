@@ -16,7 +16,13 @@
 
 # Generic / system-wide strings
 pstr_generic_back: Back
-pstr_generic_start_flight: Start flight
+pstr_generic_yes: "YES"
+pstr_generic_no: "NO"
+pstr_generic_off: "OFF"
+
+# Suffixes
+ptr_suffix_litres_per_hour: "L/h"
+ptr_suffix_minutes: "m"
 
 # Build-time defined strings
 pstr_build_version: '"Ver. " VERSION_STR'
@@ -24,6 +30,7 @@ pstr_build_date: '"Built " BUILD_DATE_STR'
 
 # Root menu
 pstr_root_menu_title: '"Fuel Timer (" VERSION_STR ")"'
+pstr_generic_start_flight: Start flight
 
 # Fuel loading menu
 pstr_fuelload_title: Fuel loading

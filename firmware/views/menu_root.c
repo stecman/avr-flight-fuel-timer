@@ -81,7 +81,7 @@ static void handleShortPress(void)
 {
     const menu_item* item = menu_get_current_item(&_menu);
 
-    global_handle_menu_select(item);
+    global_handle_menu_select(&_menu, item);
 }
 
 static void render(u8g_t* u8g)

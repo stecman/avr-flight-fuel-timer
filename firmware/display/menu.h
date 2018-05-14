@@ -15,17 +15,20 @@ typedef enum MenuItemType {
 
     // Display a value using get_display_value()
     // Enter value editing mode when clicked
-    kValueEditable,
-
-    // Display a value using get_display_value()
-    // Call on_click when clicked to immediately cycle the value
-    kValueEditableToggle,
+    kValueEditableInt,
+    kValueEditableBool,
 
     // Display a value using get_display_value()
     // Do nothing when clicked
     kValueReadOnly,
 
 } MenuItemType;
+
+typedef enum MenuFlags {
+    // When set, the cursor is drawn over the current item's value
+    kEditingMenuItem = 1 << 0,
+
+} MenuFlags;
 
 /**
  * A selectable item in a menu
@@ -34,7 +37,7 @@ typedef struct menu_item {
     const u8g_pgm_uint8_t *title;
 
     // Handlers for different menu item modes
-    char* (*getValue)(void);
+    void (*getValueAsText)(char* buffer, uint8_t length);
     void (*onClick)(void);
 
     // Specify how this menu item should behave with interaction
@@ -49,6 +52,9 @@ typedef struct menu_screen {
     const menu_item* items;
     uint8_t num_items;
     uint8_t cursor_pos;
+
+    // Boolean flags for the state of the menu
+    MenuFlags flags;
 
     // Pointer to icon in program memory
     // If this is NULL, no icon will be drawn
@@ -76,6 +82,8 @@ void menu_init(menu_screen* menu);
  */
 const menu_item* menu_get_current_item(menu_screen* menu);
 
+extern inline 
+
 /**
  * Draw a menu to screen
  *
@@ -83,8 +91,3 @@ const menu_item* menu_get_current_item(menu_screen* menu);
  * 0 ... [num_items] by the calling code (menu_wrap_cursor_pos() can help)
  */
 void menu_draw(u8g_t* u8g, const menu_screen* menu);
-
-/**
- * Return a human readable string for a boolean
- */
-const u8g_pgm_uint8_t* menu_val_format_bool(uint8_t value);

@@ -11,4 +11,4 @@
  * @param items list of items to copy
  * @param count number of items to copy
  */
-menu_item* populate_shared_menu(const menu_item* items, size_t count);
+menu_item* populate_shared_menu(const menu_item* items, uint8_t count);

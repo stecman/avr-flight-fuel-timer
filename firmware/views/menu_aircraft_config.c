@@ -4,12 +4,55 @@
 #include "display/display.h"
 #include "display/icons.h"
 #include "display/menu.h"
+#include "display/formatters.h"
 #include "macros.h"
+#include "settings/aircraft.h"
 #include "system.h"
 #include "text.h"
 #include "views/menu_shared.h"
 
 static menu_screen _menu;
+
+static void text_display_cruiseBurn(char* buffer, uint8_t length)
+{
+    AircraftConfig* config = config_get_current_aircraft();
+    text_format_litres_per_hour(config->fuelBurnCruise, buffer, length);
+}
+
+static void text_display_taxiBurn(char* buffer, uint8_t length)
+{
+    AircraftConfig* config = config_get_current_aircraft();
+    text_format_litres_per_hour(config->fuelBurnTaxi, buffer, length);
+}
+
+static void text_display_crossfeed(char* buffer, uint8_t length)
+{
+    AircraftConfig* config = config_get_current_aircraft();
+    text_format_bool(config->flags & kAircraftConfig_hasCrossfeed, buffer, length);
+}
+
+static void text_display_reserveTime(char* buffer, uint8_t length)
+{
+    AircraftConfig* config = config_get_current_aircraft();
+    text_format_minutes(config->reserveTimeMinutes, buffer, length);
+}
+
+static void text_display_tankRotation(char* buffer, uint8_t length)
+{
+    AircraftConfig* config = config_get_current_aircraft();
+
+    if (config->tankRotationMinutes == 0) {
+        strcpy_P(buffer, pstr_generic_off);
+    } else {
+        text_format_minutes(config->tankRotationMinutes, buffer, length);
+    }
+}
+
+static void text_display_tankAutoBalance(char* buffer, uint8_t length)
+{
+    AircraftConfig* config = config_get_current_aircraft();
+    text_format_bool(config->flags & kAircraftConfig_autoBalanceTanks, buffer, length);
+}
 
 // Populate shared menu item memory
 static inline void _populate_menu(void)
@@ -26,27 +69,33 @@ static inline void _populate_menu(void)
         },
         {
             .title = pstr_aircraftcfg_burn_cruise,
-            .type = kFunctionCall,
+            .type = kValueEditableInt,
+            .getValueAsText = &text_display_cruiseBurn,
         },
         {
             .title = pstr_aircraftcfg_burn_taxi,
-            .type = kValueEditable,
+            .type = kValueEditableInt,
+            .getValueAsText = &text_display_taxiBurn,
         },
         {
             .title = pstr_aircraftcfg_xfeed,
-            .type = kValueEditable,
+            .type = kValueEditableInt,
+            .getValueAsText = &text_display_crossfeed,
         },
         {
             .title = pstr_aircraftcfg_reserve,
-            .type = kValueEditable,
+            .type = kValueEditableInt,
+            .getValueAsText = &text_display_reserveTime,
         },
         {
             .title = pstr_aircraftcfg_tankrotation,
-            .type = kValueEditable,
+            .type = kValueEditableInt,
+            .getValueAsText = &text_display_tankRotation,
         },
         {
             .title = pstr_aircraftcfg_tankbalance,
-            .type = kValueEditableToggle,
+            .type = kValueEditableBool,
+            .getValueAsText = &text_display_tankAutoBalance,
         },
     };
 
@@ -68,17 +117,49 @@ static void viewWillFocus(void)
     _populate_menu();
 }
 
+static void stepSetting(int direction)
+{
+    AircraftConfig* config = config_get_current_aircraft();
+
+    if ( _menu.cursor_pos == 2 ) {
+        config->fuelBurnCruise += direction;
+
+    } else if ( _menu.cursor_pos == 3 ) {
+        config->fuelBurnTaxi += direction;
+
+    } else if ( _menu.cursor_pos == 4 ) {
+        config->flags ^= kAircraftConfig_hasCrossfeed;
+
+    } else if ( _menu.cursor_pos == 5 ) {
+        config->reserveTimeMinutes += direction;
+
+    } else if ( _menu.cursor_pos == 6 ) {
+        config->tankRotationMinutes += direction;
+
+    } else if ( _menu.cursor_pos == 7 ) {
+        config->flags ^= kAircraftConfig_autoBalanceTanks;
+    }
+}
+
 static void handleIncrement(void)
 {
-    menu_move_cursor_relative(&_menu, +1);
-    beeper_blip();
+    if (_menu.flags & kEditingMenuItem) {
+        stepSetting(1);
+    } else {
+        menu_move_cursor_relative(&_menu, +1);
+    }
+
     display_mark_dirty();
 }
 
 static void handleDecrement(void)
 {
-    menu_move_cursor_relative(&_menu, -1);
-    beeper_blip();
+    if (_menu.flags & kEditingMenuItem) {
+        stepSetting(-1);
+    } else {
+        menu_move_cursor_relative(&_menu, -1);
+    }
+
     display_mark_dirty();
 }
 
@@ -86,7 +167,7 @@ static void handleShortPress(void)
 {
     const menu_item* item = menu_get_current_item(&_menu);
 
-    global_handle_menu_select(item);
+    global_handle_menu_select(&_menu, item);
 }
 
 static void render(u8g_t* u8g)

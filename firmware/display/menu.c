@@ -15,6 +15,9 @@ static const uint8_t kFontHeight = 8;
  */
 static inline void _draw_title(u8g_t* u8g, const menu_screen* menu)
 {
+    // Drawing white on black
+    u8g_SetColorIndex(u8g, 1);
+
     uint8_t titleOffsetX = 0;
 
     if (menu->icon_xbm != NULL) {
@@ -69,9 +72,9 @@ static bool _item_has_value(const menu_item* item)
 {
     switch (item->type) {
         case kValueReadOnly:
-        case kValueEditable:
-        case kValueEditableToggle:
-            return true;
+        case kValueEditableInt:
+        case kValueEditableBool:
+            return item->getValueAsText != NULL;
     }
 
     return false;
@@ -82,14 +85,46 @@ static bool _item_has_value(const menu_item* item)
  *
  * This assumes the caller has configured font and colour settings
  */
-static void _draw_row(u8g_t* u8g, const menu_item* item, uint8_t drawOffset)
+static void _draw_row(u8g_t* u8g, const menu_item* item, bool focused, bool editing, uint8_t drawOffset)
 {
+    // Draw selection box across whole line if we're focused
+    if (focused && !editing) {
+        u8g_DrawBox(u8g, 0, drawOffset + kEdgePadding, kScreenWidth, kFontHeight);
+        u8g_SetColorIndex(u8g, 0);
+    } else {
+        u8g_SetColorIndex(u8g, 1);
+    }
+
     // Draw title
     u8g_DrawStrP(u8g, kEdgePadding, drawOffset + kFontHeight, item->title);
 
+    // Remove any invert
+    u8g_SetColorIndex(u8g, 1);
+
     // Draw value if there is one
     if (_item_has_value(item)) {
-        u8g_DrawStrP(u8g, kScreenWidth - kEdgePadding - 15, drawOffset + kFontHeight, PSTR("64L"));
+        char buffer[7];
+        item->getValueAsText(buffer, 7);
+
+        uint8_t width = u8g_GetStrWidth(u8g, buffer);
+
+        if (focused) {
+            // Draw selection around value if editing
+            if (editing) {
+                u8g_DrawBox(
+                    u8g,
+                    kScreenWidth - width - 2, // Right edge of screen to left edge of value
+                    drawOffset + kEdgePadding, // Current menu item's Y position
+                    kScreenWidth,
+                    kFontHeight
+                );
+            }
+
+            // Invert the value colour when focused
+            u8g_SetColorIndex(u8g, 0);
+        }
+
+        u8g_DrawStr(u8g, kScreenWidth - kEdgePadding - width, drawOffset + kFontHeight, buffer);
     }
 }
 
@@ -122,7 +157,10 @@ void menu_move_cursor_relative(menu_screen* menu, int8_t delta)
 
 void menu_init(menu_screen* menu)
 {
+    // Set menu to initial state
     menu->cursor_pos = 0;
+    menu->flags = 0;
+    menu->icon_xbm = NULL;
 }
 
 const menu_item* menu_get_current_item(menu_screen* menu)
@@ -170,27 +208,12 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu)
         drawOffset = (drawIndex * 9) + 17;
         drawIndex++;
 
-        // Draw selected state if this item is selected
-        if (i == cursorPos) {
-            // Draw box
-            u8g_DrawRBox(u8g, 0, drawOffset + kEdgePadding, kScreenWidth, kFontHeight, 0);
-
-            // Draw inverted
-            u8g_SetColorIndex(u8g, 0);
-            _draw_row(u8g, item, drawOffset);
-            u8g_SetColorIndex(u8g, 1);
-        } else {
-            // Draw regular text
-            _draw_row(u8g, item, drawOffset);
-        }
-    }
-}
-
-const u8g_pgm_uint8_t* menu_val_format_bool(uint8_t value)
-{
-    if (value == 0) {
-        return PSTR("No");
-    } else {
-        return PSTR("Yes");
+        _draw_row(
+            u8g,
+            item,
+            i == cursorPos /* is focused */,
+            (menu->flags & kEditingMenuItem) != 0 /* is editing */,
+            drawOffset
+        );
     }
 }

@@ -18,7 +18,7 @@ CFLAGS += -I -I. -I$(shell pwd) -I./lib/
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 CFLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections
 CFLAGS += -Wl,--relax -mcall-prologues
-CFLAGS += -std=gnu99 -Wstrict-prototypes
+CFLAGS += -std=gnu11 -Wstrict-prototypes
 
 # Specfic warnings as errors
 CFLAGS += -Werror=return-type

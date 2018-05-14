@@ -1,5 +1,6 @@
 #pragma once
 
+#include "display/display.h"
 #include "display/menu.h"
 #include "eventloop.h"
 #include "view_stack.h"
@@ -35,4 +36,4 @@ void global_viewstack_pop_silent(void);
  * This is separate to the definition of menu_screen and menu_item as it relies
  * on global state.
  */
-void global_handle_menu_select(const menu_item* item);
+void global_handle_menu_select(menu_screen* menu, const menu_item* item);

@@ -14,10 +14,12 @@ void rtenc_setup(void)
     DDRD &= ~(_BV(PD2) | _BV(PD3) | _BV(PD4)); // Encoder and push-button as inputs
     PORTD |= _BV(PD2); // Pull-up for push-button
 
+    // INT0 is used for the push button so it can wake the device up.
     EIMSK |= _BV(INT0); // Enable INT0 for push-button
     EICRA |= _BV(ISC01); // Trigger on falling edge
 
     // Enable pin change interrupt for both rotary encoder outputs (PD3/PD4)
+    // Turning the rotary encoder uses a plain pin change interrupt to save pins.
     PCMSK2 |= _BV(PCINT19) | _BV(PCINT20);
     PCICR |= _BV(PCIE2);
 

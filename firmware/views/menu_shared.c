@@ -8,7 +8,7 @@
 
 static menu_item _shared_items[SHARED_MENU_SIZE];
 
-menu_item* populate_shared_menu(const menu_item* items, size_t count)
+menu_item* populate_shared_menu(const menu_item* items, uint8_t count)
 {
 	assert(count <= SHARED_MENU_SIZE);
 
