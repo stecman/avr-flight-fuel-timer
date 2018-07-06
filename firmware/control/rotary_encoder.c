@@ -11,16 +11,16 @@ EventHandler _shortPressHandler;
 // Set up rotary encoder pins and interrupts
 void rtenc_setup(void)
 {
-    DDRD &= ~(_BV(PD2) | _BV(PD3) | _BV(PD4)); // Encoder and push-button as inputs
+    DDRD &= ~(_BV(PD2) | _BV(PD4) | _BV(PD5)); // Encoder and push-button as inputs
     PORTD |= _BV(PD2); // Pull-up for push-button
 
     // INT0 is used for the push button so it can wake the device up.
     EIMSK |= _BV(INT0); // Enable INT0 for push-button
     EICRA |= _BV(ISC01); // Trigger on falling edge
 
-    // Enable pin change interrupt for both rotary encoder outputs (PD3/PD4)
+    // Enable pin change interrupt for both rotary encoder outputs (PD4/PD5)
     // Turning the rotary encoder uses a plain pin change interrupt to save pins.
-    PCMSK2 |= _BV(PCINT19) | _BV(PCINT20);
+    PCMSK2 |= _BV(PCINT20) | _BV(PCINT21);
     PCICR |= _BV(PCIE2);
 
     sei(); // enable interrupts
@@ -61,10 +61,10 @@ ISR(PCINT2_vect)
     static uint8_t encoder_seq = 0x0;
 
     encoder_seq <<= 2; // Shift last state
-    encoder_seq |= 0b11 & (PIND >> 3); // Copy PIND state (bits 3 and 4) to bits 0 and 1
+    encoder_seq |= 0b11 & (PIND >> 4); // Copy PIND state (bits 4 and 5) to bits 0 and 1
 
-    // Check if the sequence of the the last four updates indicates turn
-    // The bits in each sequence indicate the state of PD4 and PD3 over time (LSBs are newer)
+    // Check if the sequence of the the last four updates indicates a turn
+    // The bits in each sequence indicate the state of PD5 and PD4 over time (LSBs are newer)
     switch (encoder_seq) {
         case 0b10000111:
             global_eventloop_queue(_decrementHandler);
