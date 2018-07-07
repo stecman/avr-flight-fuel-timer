@@ -22,8 +22,6 @@ void rtenc_setup(void)
     // Turning the rotary encoder uses a plain pin change interrupt to save pins.
     PCMSK2 |= _BV(PCINT20) | _BV(PCINT21);
     PCICR |= _BV(PCIE2);
-
-    sei(); // enable interrupts
 }
 
 void rtenc_bind_incr(EventHandler handler)

@@ -3,11 +3,11 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-#include <string.h>
 #include <util/delay.h>
 
 // Firmware
 #include "beeper.h"
+#include "control/clock.h"
 #include "control/rotary_encoder.h"
 #include "display/display.h"
 #include "display/menu.h"
@@ -29,14 +29,23 @@ int main(void)
     CLKPR = 0x80;
     CLKPR = 0x00;
 
-    // Initialise pins and state
-    beeper_setup();
-    display_setup();
-    rtenc_setup();
+    // Init event loop before anything can push to it
     global_eventloop_init();
+
+    // Initialise pins and state
+    // Note that init_display() currently needs to be initialised before RTC as
+    // these both use the I2C bus, but we rely on the display implementation to
+    // reset the I2C bus to a known state.
+    display_setup();
+    rtc_setup();
+    beeper_setup();
+    rtenc_setup();
 
     // Set the root view
     global_viewstack_init(&view_menu_root);
+
+    // Start handling interrupts
+    sei();
 
     for (;;) {
         // Process any pending events
