@@ -67,8 +67,7 @@ void global_handle_menu_select(menu_screen* menu, const menu_item* item)
             }
             break;
 
-        case kValueEditableInt:
-        case kValueEditableBool:
+        case kValueEditable:
             // Toggle editing state and redraw
             menu->flags ^= kEditingMenuItem;
             display_mark_dirty();

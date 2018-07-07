@@ -69,32 +69,32 @@ static inline void _populate_menu(void)
         },
         {
             .title = pstr_aircraftcfg_burn_cruise,
-            .type = kValueEditableInt,
+            .type = kValueEditable,
             .getValueAsText = &text_display_cruiseBurn,
         },
         {
             .title = pstr_aircraftcfg_burn_taxi,
-            .type = kValueEditableInt,
+            .type = kValueEditable,
             .getValueAsText = &text_display_taxiBurn,
         },
         {
             .title = pstr_aircraftcfg_xfeed,
-            .type = kValueEditableInt,
+            .type = kValueEditable,
             .getValueAsText = &text_display_crossfeed,
         },
         {
             .title = pstr_aircraftcfg_reserve,
-            .type = kValueEditableInt,
+            .type = kValueEditable,
             .getValueAsText = &text_display_reserveTime,
         },
         {
             .title = pstr_aircraftcfg_tankrotation,
-            .type = kValueEditableInt,
+            .type = kValueEditable,
             .getValueAsText = &text_display_tankRotation,
         },
         {
             .title = pstr_aircraftcfg_tankbalance,
-            .type = kValueEditableBool,
+            .type = kValueEditable,
             .getValueAsText = &text_display_tankAutoBalance,
         },
     };

@@ -17,8 +17,7 @@ typedef enum MenuItemType {
 
     // Display a value using get_display_value()
     // Enter value editing mode when clicked
-    kValueEditableInt,
-    kValueEditableBool,
+    kValueEditable,
 
     // Display a value using get_display_value()
     // Do nothing when clicked

@@ -48,8 +48,7 @@ static bool _item_has_value(const menu_item* item)
 {
     switch (item->type) {
         case kValueReadOnly:
-        case kValueEditableInt:
-        case kValueEditableBool:
+        case kValueEditable:
             return item->getValueAsText != NULL;
         default:
             break;
