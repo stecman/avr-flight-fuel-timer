@@ -37,7 +37,7 @@ POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 # symbolic targets:
 all: $(SOURCES) main.hex
 
-text.c: text.yml scripts/build_text.py
+text.c: text.yml scripts/build_text.py .FORCE
 	# Build a file of progmem strings
 	./scripts/build_text.py text.yml
 
@@ -85,6 +85,10 @@ main.hex: main.elf
 
 disasm:	main.elf
 	avr-objdump -d main.elf
+
+# Empty target to force build on some targets
+.PHONY: FORCE
+.FORCE:
 
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
