@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "display/icons.h"
+
 #include "u8glib/src/u8g.h"
 
 // Flags for how interactions with a menu item should be handled
@@ -57,11 +59,7 @@ typedef struct menu_screen {
     MenuFlags flags;
 
     // Pointer to icon in program memory
-    // If this is NULL, no icon will be drawn
-    const u8g_pgm_uint8_t *icon_xbm;
-
-    // Icon dimensions as a pair of four-bit numbers
-    uint8_t icon_dimensions;
+    const XbmIcon* icon;
 } menu_screen;
 
 /**

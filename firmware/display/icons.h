@@ -1,11 +1,18 @@
-// C
+#pragma once
+
 #include <stdint.h>
 
-// Icon XBM format data
-extern const __flash uint8_t icon_plane_5x5[];
-extern const __flash uint8_t icon_settings_3x5[];
+typedef __flash struct _XbmIcon {
+	// Dimensions as a pair of 4-bit numbers (read the individual hex digits as X and Y)
+	const uint8_t dimensions;
 
-// Dimensions as a pair of 4-bit numbers (read the individual hex digits as X and Y)
-static const uint8_t icon_dimensions_plane = 0x55;
-static const uint8_t icon_dimension_settings = 0x35;
-// static const uint8_t icon_fuel_dimension = 0x45;
+	// 2-colour bitmap data exported as XBM and copied here manually
+	// This is a little larger than raw 1bpp bitmap data, but u8glib has
+	// built in support for arbitrary dimensions when using XBM.
+	const uint8_t data[];
+} XbmIcon;
+
+extern const __flash XbmIcon icon_plane;
+extern const __flash XbmIcon icon_settings;
+extern const __flash XbmIcon icon_fuel;
+extern const __flash XbmIcon icon_corner_clock;

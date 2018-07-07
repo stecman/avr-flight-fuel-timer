@@ -108,8 +108,7 @@ static void viewWillMount(void)
     // Set up menu memory
     menu_init(&_menu);
     _menu.title = pstr_aircraftcfg_title;
-    _menu.icon_xbm = icon_settings_3x5;
-    _menu.icon_dimensions = icon_dimension_settings;
+    _menu.icon = &icon_settings;
 }
 
 static void viewWillFocus(void)

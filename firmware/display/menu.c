@@ -3,38 +3,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "display/common.h"
+
 static const uint8_t kScreenWidth = 128;
 static const uint8_t kScreenHeight = 64;
 static const uint8_t kMaxItemsOnScreen = 5;
 static const uint8_t kEdgePadding = 1;
 
 static const uint8_t kFontHeight = 8;
-
-/**
- * Draw a menu title at the top of the screen
- */
-static inline void _draw_title(u8g_t* u8g, const menu_screen* menu)
-{
-    // Drawing white on black
-    u8g_SetColorIndex(u8g, 1);
-
-    uint8_t titleOffsetX = 0;
-
-    if (menu->icon_xbm != NULL) {
-        uint8_t width = menu->icon_dimensions >> 4;
-        uint8_t height = menu->icon_dimensions & 0x0F;
-
-        // Draw icon anchored to the baseline of the text
-        u8g_DrawXBMP(u8g, 5 - width, kFontHeight - height, width, height, menu->icon_xbm);
-
-        // Enough spacing for the icon to not look like it's part of the title text
-        titleOffsetX = 9;
-    }
-
-    // Draw title with a separator line for the header underneath
-    u8g_DrawStrP(u8g, titleOffsetX, kFontHeight, menu->title);
-    u8g_DrawLine(u8g, 0, 11, kScreenWidth, 11);
-}
 
 /**
  * Draw a [current page]/[total pages] indicator at the top right of the screen
@@ -160,7 +136,7 @@ void menu_init(menu_screen* menu)
     // Set menu to initial state
     menu->cursor_pos = 0;
     menu->flags = 0;
-    menu->icon_xbm = NULL;
+    menu->icon = NULL;
 }
 
 const menu_item* menu_get_current_item(menu_screen* menu)
@@ -197,7 +173,7 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu)
     // Ensure the menu font is in use
     u8g_SetFont(u8g, u8g_font_5x8r);
 
-    _draw_title(u8g, menu);
+    display_draw_title(u8g, menu->title, menu->icon);
     _draw_page_indicator(u8g, page, numPages);
 
     // Render each menu item
