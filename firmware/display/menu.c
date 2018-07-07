@@ -32,7 +32,7 @@ static inline void _draw_page_indicator(u8g_t* u8g, uint8_t currentPage, uint8_t
             pageText[0],
             '/',
             numPagesText[0],
-            NULL
+            '\0'
         };
 
         // Using the 5x8 font, this string has a consistent width of 15
@@ -51,6 +51,8 @@ static bool _item_has_value(const menu_item* item)
         case kValueEditableInt:
         case kValueEditableBool:
             return item->getValueAsText != NULL;
+        default:
+            break;
     }
 
     return false;

@@ -72,5 +72,8 @@ void global_handle_menu_select(menu_screen* menu, const menu_item* item)
             // Toggle editing state and redraw
             menu->flags ^= kEditingMenuItem;
             display_mark_dirty();
+
+        default:
+            break;
     }
 }

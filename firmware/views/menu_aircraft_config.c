@@ -42,7 +42,7 @@ static void text_display_tankRotation(char* buffer, uint8_t length)
     AircraftConfig* config = config_get_current_aircraft();
 
     if (config->tankRotationMinutes == 0) {
-        strcpy_P(buffer, pstr_generic_off);
+        strcpy_P(buffer, (const __flash char*) pstr_generic_off);
     } else {
         text_format_minutes(config->tankRotationMinutes, buffer, length);
     }

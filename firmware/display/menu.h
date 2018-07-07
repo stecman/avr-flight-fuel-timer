@@ -80,8 +80,6 @@ void menu_init(menu_screen* menu);
  */
 const menu_item* menu_get_current_item(menu_screen* menu);
 
-extern inline 
-
 /**
  * Draw a menu to screen
  *
