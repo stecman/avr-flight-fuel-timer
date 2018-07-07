@@ -64,14 +64,12 @@ static void viewWillFocus(void)
 static void handleIncrement(void)
 {
     menu_move_cursor_relative(&_menu, +1);
-    beeper_blip();
     display_mark_dirty();
 }
 
 static void handleDecrement(void)
 {
     menu_move_cursor_relative(&_menu, -1);
-    beeper_blip();
     display_mark_dirty();
 }
 

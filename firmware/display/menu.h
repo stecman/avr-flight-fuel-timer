@@ -49,7 +49,7 @@ typedef struct menu_item {
  * A collection of menu items, rendered as a single screen
  */
 typedef struct menu_screen {
-    const u8g_pgm_uint8_t *title;
+    const u8g_pgm_uint8_t* title;
     const menu_item* items;
     uint8_t num_items;
     uint8_t cursor_pos;

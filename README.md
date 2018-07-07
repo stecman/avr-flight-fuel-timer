@@ -45,6 +45,16 @@ make flash PROGRAMMER="-c arduino -P /dev/ttyUSB0 -b57600"
 make flash PROGRAMMER="dragon_isp"
 ```
 
+## Notes for users
+
+- Fuel and fuel burn per hour are represented as whole integers. Partly because
+  this device is for approximation, and partly because the precision of a fuel
+  tank dipstick or a "fuel burn per hour" average/max is unlikely to be greater
+  than whole numbers.
+
+  If you want better accuracy, get avionics that have a digital fuel flow meter
+  and fuel level sensors that can work out your actual burn and endurance.
+
 ## Developer notes
 
 - Strings are stored in `PROGMEM` (`__flash` under `gnu99`). These are defined in
@@ -55,7 +65,7 @@ make flash PROGRAMMER="dragon_isp"
   to avoid hard to reproduce bugs that are possible with heap allocation on
   microcontrollers, and partly as a fun challenge.
 
-- State is exists statically in a few places (eg. `system.c`). Global variables
+- State exists statically in a few places (eg. `system.c`). Global variables
   are avoided in favour of private state with an exposed interface. Functionality
   is defined independently of this state where possible (eg. `eventloop.h`).
 

@@ -21,7 +21,7 @@
 
 int main(void)
 {
-    // Recover from any watchdog timer reset mishaps
+    // Recover from the watchdog timer left running
     wdt_reset();
     wdt_disable();
 
