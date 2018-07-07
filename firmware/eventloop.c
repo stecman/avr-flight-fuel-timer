@@ -68,23 +68,24 @@ EventHandler eventloop_dequeue(EventQueue* queue)
     // and increment when the queue is full.
     cli();
 
-    // When the read index catches up to the insertion index, theres no more data
-    if (queue->insertionIndex == queue->readIndex) {
+    const uint8_t readIndex = queue->readIndex;
+
+    // When the read index catches up to the insertion index, there's no more data
+    if (queue->insertionIndex == readIndex) {
         sei();
         return NULL;
     }
 
     // Get a copy of the function pointer
-    EventHandler handler = queue->queue[ queue->readIndex ];
+    EventHandler handler = queue->queue[ readIndex ];
 
     // Clear this slot in the queue
     // This isn't strictly necessary, but it helps prevent any bugs or corruption
     // calling handlers that were previously in the queue but should no longer be called
-    queue->queue[ queue->readIndex ] = NULL;
+    queue->queue[ readIndex ] = NULL;
 
     // Increment read index
-    queue->readIndex = next_index(queue->readIndex);
-
+    queue->readIndex = next_index(readIndex);
 
     sei();
 
