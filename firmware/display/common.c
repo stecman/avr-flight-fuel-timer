@@ -11,8 +11,8 @@ void display_draw_title(u8g_t* u8g, const u8g_pgm_uint8_t* title, const XbmIcon*
     uint8_t titleOffsetX = 0;
 
     if (icon != NULL) {
-        uint8_t width = icon->dimensions >> 4;
-        uint8_t height = icon->dimensions & 0x0F;
+        const uint8_t width = icon->dimensions >> 4;
+        const uint8_t height = icon->dimensions & 0x0F;
 
         // Draw icon anchored to the baseline of the text
         u8g_DrawXBMP(u8g, 5 - width, kFontHeight - height, width, height, icon->data);

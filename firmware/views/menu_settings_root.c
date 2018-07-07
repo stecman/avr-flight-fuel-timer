@@ -1,6 +1,5 @@
-#include "menu_root.h"
+#include "menu_settings_root.h"
 
-#include "beeper.h"
 #include "display/display.h"
 #include "display/icons.h"
 #include "display/menu.h"
@@ -8,30 +7,17 @@
 #include "system.h"
 #include "text.h"
 #include "views/menu_shared.h"
+#include "views/settings_date_time.h"
+#include "views/settings_firmware.h"
 
-#include "views/flight_main.h"
-#include "views/fuel_loading.h"
-#include "views/menu_aircraft_config.h"
-#include "views/menu_settings_root.h"
-
-static void openSystemSettings(void)
+static void handleSetDateTime(void)
 {
-    global_viewstack_push(&view_settings_root);
+    global_viewstack_push(&view_settings_date_time);
 }
 
-static void openFuelConfig(void)
+static void showFirmwareInfo(void)
 {
-    global_viewstack_push(&view_fuel_loading);
-}
-
-static void openAircraftConfigView(void)
-{
-    global_viewstack_push(&view_menu_aircraft_config);
-}
-
-static void handleStartFlight(void)
-{
-    global_viewstack_push(&view_flight_main);
+    global_viewstack_push(&view_settings_firmware);
 }
 
 static menu_screen _menu;
@@ -41,23 +27,18 @@ static inline void _populate_menu(void)
 {
     const menu_item default_items[] = {
         {
-            .title = pstr_system_settings_title,
-            .onClick = &openSystemSettings,
+            .title = pstr_generic_back,
+            .type  = kFunctionCall,
+            .onClick = &global_viewstack_pop_silent,
+        },
+        {
+            .title = pstr_date_time_title,
+            .onClick = &handleSetDateTime,
             .type = kFunctionCall,
         },
         {
-            .title = pstr_fuelload_title,
-            .onClick = &openFuelConfig,
-            .type = kFunctionCall,
-        },
-        {
-            .title = pstr_aircraftcfg_title,
-            .onClick = &openAircraftConfigView,
-            .type = kFunctionCall,
-        },
-        {
-            .title = pstr_generic_start_flight,
-            .onClick = &handleStartFlight,
+            .title = pstr_firmware_title,
+            .onClick = &showFirmwareInfo,
             .type = kFunctionCall,
         },
     };
@@ -70,8 +51,8 @@ static void viewWillMount(void)
 {
     // Set up menu memory
     menu_init(&_menu);
-    _menu.title = pstr_root_menu_title;
-    _menu.icon = &icon_plane;
+    _menu.title = pstr_system_settings_title;
+    _menu.icon = &icon_corner_clock;
 }
 
 static void viewWillFocus(void)
@@ -104,7 +85,7 @@ static void render(u8g_t* u8g)
     menu_draw(u8g, &_menu);
 }
 
-ViewStackFrame view_menu_root = {
+ViewStackFrame view_settings_root = {
     .frameWillMount = &viewWillMount,
     .frameWillGetFocus = &viewWillFocus,
     .handleIncrement = &handleIncrement,

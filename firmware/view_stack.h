@@ -5,7 +5,7 @@
 #include "stdbool.h"
 
 // Define the deepest level of views
-#define VIEWSTACK_SIZE 10
+#define VIEWSTACK_SIZE 5
 
 typedef struct ViewStackFrame {
     // Callback: called when this frame is about to be added to the stack for
