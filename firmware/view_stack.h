@@ -24,7 +24,7 @@ typedef struct ViewStackFrame {
     EventHandler handleShortPress;
 
     // Draw display (see display/display.h)
-    Renderer renderer; 
+    Renderer renderer;
 
 } ViewStackFrame;
 
@@ -58,5 +58,5 @@ bool viewstack_push(ViewStack* vs, ViewStackFrame* view);
 
 /**
  * Replace the current view with another
- */ 
+ */
 void viewstack_replace(ViewStack* vs, ViewStackFrame* view);

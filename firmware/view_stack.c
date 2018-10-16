@@ -73,7 +73,7 @@ ViewStackFrame* viewstack_pop(ViewStack* vs)
     // The old pointer isn't cleaned up or nulled as all views are assumed to be static
     --(vs->top);
     viewstack_make_active(_get_top_frame(vs), false);
-    
+
     return oldView;
 }
 
