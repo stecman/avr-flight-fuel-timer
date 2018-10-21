@@ -7,8 +7,8 @@
 
 // Firmware
 #include "beeper.h"
-#include "control/clock.h"
 #include "control/rotary_encoder.h"
+#include "control/rtc.h"
 #include "display/display.h"
 #include "display/menu.h"
 #include "macros.h"
@@ -38,6 +38,7 @@ int main(void)
     // reset the I2C bus to a known state.
     display_setup();
     rtc_setup();
+
     beeper_setup();
     rtenc_setup();
 

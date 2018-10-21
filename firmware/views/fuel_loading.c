@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "beeper.h"
-#include "control/clock.h"
+#include "control/rtc.h"
 #include "display/common.h"
 #include "display/display.h"
 #include "display/icons.h"

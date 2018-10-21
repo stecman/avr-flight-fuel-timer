@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "beeper.h"
-#include "control/clock.h"
+#include "control/rtc.h"
 #include "display/common.h"
 #include "display/display.h"
 #include "display/icons.h"
@@ -11,25 +11,69 @@
 #include "system.h"
 #include "text.h"
 
+// Temporary buffer for modifying time value
+static RtcTime _time;
+
+// Cursor index
+static uint8_t _cursor;
+
 static void viewWillMount(void)
 {
+    // Read current time and move cursor to first value
+    rtc_read_time(&_time);
+    _cursor = 0;
+}
 
+static uint8_t _clamp(uint8_t value, uint8_t max)
+{
+    if (value == 255) {
+        return max;
+    } else if (value > max) {
+        return 0;
+    }
+
+    return value;
+}
+
+static void changeValue(int8_t delta)
+{
+    switch (_cursor) {
+        case 0: // Hours
+            _time.hours = _clamp(_time.hours + delta, 23);
+            break;
+
+        case 1: // Minutes
+            _time.minutes = _clamp(_time.minutes + delta, 59);
+            break;
+
+        case 2: // Seconds
+            _time.seconds = _clamp(_time.seconds + delta, 59);
+            break;
+    }
+
+    display_mark_dirty();
 }
 
 static void handleIncrement(void)
 {
-
+    changeValue(1);
 }
 
 static void handleDecrement(void)
 {
-
+    changeValue(-1);
 }
 
 
 static void handleShortPress(void)
 {
-    global_viewstack_pop_silent();
+    if (_cursor < 2) {
+        ++_cursor;
+        display_mark_dirty();
+    } else {
+        rtc_set_time(&_time);
+        global_viewstack_pop_silent();
+    }
 }
 
 inline void drawCenterStrP(u8g_t* u8g,
@@ -41,9 +85,46 @@ inline void drawCenterStrP(u8g_t* u8g,
     u8g_DrawStrP(u8g, 64 - ((strLen * charWidth)/2), yPos, pstr);
 }
 
+static char* zeroPad(uint8_t value, char* output)
+{
+    uint8_t offset = 0;
+
+    if (value < 10) {
+        output[0] = '0';
+    }
+
+    utoa(value, output + offset, 10);
+
+    return output + 2;
+}
+
 static void render(u8g_t* u8g)
 {
     display_draw_title(u8g, pstr_date_time_title, &icon_corner_clock);
+
+    char buf[3];
+
+    for (uint8_t i = 0; i < 3; ++i) {
+
+        u8g_SetColorIndex(u8g, 1);
+
+        const uint8_t x = i * 20;
+        const uint8_t y = 36;
+
+        if (i == _cursor) {
+            u8g_DrawBox(
+                u8g,
+                x - 1,
+                y - 8,
+                11,
+                8
+            );
+            u8g_SetColorIndex(u8g, 0);
+        }
+
+        zeroPad(((const uint8_t*)&_time)[i], buf);
+        u8g_DrawStr(u8g, x, y, buf);
+    }
 }
 
 ViewStackFrame view_settings_date_time = {
