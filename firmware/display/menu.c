@@ -4,13 +4,15 @@
 #include <stdbool.h>
 
 #include "display/common.h"
+#include "display/fonts.h"
 
 static const uint8_t kScreenWidth = 128;
 static const uint8_t kScreenHeight = 64;
 static const uint8_t kMaxItemsOnScreen = 5;
 static const uint8_t kEdgePadding = 1;
 
-static const uint8_t kFontHeight = 8;
+static const uint8_t kFontHeight = 9;
+static const uint8_t kMenuDrawOffset = 14;
 
 /**
  * Draw a [current page]/[total pages] indicator at the top right of the screen
@@ -37,7 +39,7 @@ static inline void _draw_page_indicator(u8g_t* u8g, uint8_t currentPage, uint8_t
 
         // Using the 5x8 font, this string has a consistent width of 15
         // (assuming the number of pages is always a single digit)
-        u8g_DrawStr(u8g, kScreenWidth - 15, 8, pageDisplay);
+        u8g_DrawStr(u8g, kScreenWidth - 15, kFontHeight, pageDisplay);
     }
 }
 
@@ -172,7 +174,7 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu)
     }
 
     // Ensure the menu font is in use
-    u8g_SetFont(u8g, u8g_font_5x8r);
+    u8g_SetFont(u8g, font_scientifica);
 
     display_draw_title(u8g, menu->title, menu->icon);
     _draw_page_indicator(u8g, page, numPages);
@@ -182,7 +184,7 @@ void menu_draw(u8g_t* u8g, const menu_screen* menu)
         const menu_item* item = &(menu->items[i]);
 
         // Position based on font height, offset by the header height
-        drawOffset = (drawIndex * 9) + 17;
+        drawOffset = (drawIndex * (kFontHeight + 1)) + kMenuDrawOffset;
         drawIndex++;
 
         _draw_row(
