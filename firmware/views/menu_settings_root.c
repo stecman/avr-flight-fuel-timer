@@ -57,6 +57,8 @@ static inline void _populate_menu(void)
         },
     };
 
+    ASSERT_VALID_MENU_SIZE(default_items);
+
     _menu.items = populate_shared_menu(default_items, COUNT_OF(default_items));
     _menu.num_items = COUNT_OF(default_items);
 }

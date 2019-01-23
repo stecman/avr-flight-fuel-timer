@@ -1,5 +1,16 @@
 #include "display/menu.h"
+#include "macros.h"
 #include "system.h"
+
+#define SHARED_MENU_SIZE 8
+
+/**
+ * Compile-time assert that the passed array of menu items will fit into the shared buffer
+ */
+#define ASSERT_VALID_MENU_SIZE(array) \
+	_Static_assert(COUNT_OF(array) <= SHARED_MENU_SIZE, \
+        "Menu item count exceeds the shared buffer size of " \
+        STR(SHARED_MENU_SIZE) ". Increase the shared buffer size!");
 
 /**
  * Copy items to shared memory and return the shared list
