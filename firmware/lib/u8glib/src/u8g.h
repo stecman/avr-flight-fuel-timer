@@ -1267,6 +1267,9 @@ int8_t u8g_GetGlyphDeltaX(u8g_t *u8g, uint8_t requested_encoding);
 
 int8_t u8g_draw_glyph(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, uint8_t encoding); /* used by u8g_cursor.c */
 
+// Custom implementation that scales character data during rendering
+int8_t u8g_draw_glyph_scaled(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, uint8_t encoding, uint8_t scale);
+
 int8_t u8g_DrawGlyphDir(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, uint8_t dir, uint8_t encoding);
 int8_t u8g_DrawGlyph(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, uint8_t encoding);
 int8_t u8g_DrawGlyph90(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, uint8_t encoding);

@@ -607,6 +607,74 @@ int8_t u8g_draw_glyph(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, uint8_t encoding)
   return u8g->glyph_dx;
 }
 
+int8_t u8g_draw_glyph_scaled(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, uint8_t encoding, uint8_t scale)
+{
+  const u8g_pgm_uint8_t *data;
+  uint8_t w, h;
+  uint8_t i, j;
+  u8g_uint_t ix, iy;
+
+  {
+    u8g_glyph_t g = u8g_GetGlyph(u8g, encoding);
+
+    if ( g == NULL  ) {
+      return 0;
+    }
+
+    data = u8g_font_GetGlyphDataStart(u8g->font, g);
+  }
+
+  w = u8g->glyph_width;
+  h = u8g->glyph_height;
+
+  x += u8g->glyph_x;
+  y -= u8g->glyph_y;
+  y--;
+
+  if ( u8g_IsBBXIntersection(u8g, x, y-h+1, w, h) == 0 ){
+    return u8g->glyph_dx;
+  }
+
+  /* now, w is reused as bytes per line */
+  w += 7;
+  w /= 8;
+
+  iy = y;
+  iy -= h * scale;
+  iy++;
+
+  for( j = 0; j < h; j++ )
+  {
+    ix = x;
+    for( i = 0; i < w; i++ )
+    {
+      uint8_t byte = u8g_pgm_read(data);
+
+      for (uint8_t bit = 8; bit != 0; --bit) {
+
+        // Draw pixel at scale
+        if ( byte & 0x80 ) {
+          for ( uint8_t xp = 0; xp < scale; ++xp ) {
+            for ( uint8_t yp = 0; yp < scale; ++yp ) {
+              u8g_DrawPixel(u8g, ix + xp, iy + yp);
+            }
+          }
+        }
+
+        ix += scale;
+
+        byte <<= 1;
+      }
+
+      data++;
+    }
+
+    iy += scale;
+  }
+
+  return u8g->glyph_dx * scale;
+}
+
 int8_t u8g_DrawGlyph(u8g_t *u8g, u8g_uint_t x, u8g_uint_t y, uint8_t encoding)
 {
   y += u8g->font_calc_vref(u8g);
