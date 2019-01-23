@@ -36,6 +36,6 @@ void display_set_renderer(Renderer renderer);
 void display_draw(void);
 
 /**
- * Set the brightness of the display
+ * Set the contrast of the display
  */
-void display_set_brightness(uint8_t brightness);
+void display_set_contrast(uint8_t contrast);

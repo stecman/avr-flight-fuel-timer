@@ -32,10 +32,10 @@ int main(void)
     // Init event loop before anything can push to it
     global_eventloop_init();
 
+    // Set I2C frequency to 400KHz
+    TWBR = F_CPU/(2*400000)-8;
+
     // Initialise pins and state
-    // Note that init_display() currently needs to be initialised before RTC as
-    // these both use the I2C bus, but we rely on the display implementation to
-    // reset the I2C bus to a known state.
     display_setup();
     rtc_setup();
 

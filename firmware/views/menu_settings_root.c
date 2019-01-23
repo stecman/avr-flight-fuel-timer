@@ -10,6 +10,12 @@
 #include "views/settings_date_time.h"
 #include "views/settings_firmware.h"
 
+#include "stdlib.h"
+
+static menu_screen _menu;
+
+static uint8_t _contrast = 34;
+
 static void handleSetDateTime(void)
 {
     global_viewstack_push(&view_settings_date_time);
@@ -20,7 +26,10 @@ static void showFirmwareInfo(void)
     global_viewstack_push(&view_settings_firmware);
 }
 
-static menu_screen _menu;
+static void text_display_contrast(char* buffer, uint8_t length)
+{
+    itoa(_contrast, buffer, 10);
+}
 
 // Populate shared menu item memory
 static inline void _populate_menu(void)
@@ -40,6 +49,11 @@ static inline void _populate_menu(void)
             .title = pstr_firmware_title,
             .onClick = &showFirmwareInfo,
             .type = kFunctionCall,
+        },
+        {
+            .title = pstr_contrast,
+            .type = kValueEditable,
+            .getValueAsText = &text_display_contrast,
         },
     };
 
@@ -62,13 +76,37 @@ static void viewWillFocus(void)
 
 static void handleIncrement(void)
 {
-    menu_move_cursor_relative(&_menu, +1);
+    if (_menu.flags & kEditingMenuItem) {
+        _contrast++;
+
+        if (_contrast > 63) {
+            _contrast = 0;
+        }
+
+        display_set_contrast(_contrast);
+
+    } else {
+        menu_move_cursor_relative(&_menu, +1);
+    }
+
     display_mark_dirty();
 }
 
 static void handleDecrement(void)
 {
-    menu_move_cursor_relative(&_menu, -1);
+    if (_menu.flags & kEditingMenuItem) {
+        _contrast--;
+
+        if (_contrast > 63) {
+            _contrast = 63;
+        }
+
+        display_set_contrast(_contrast);
+
+    } else {
+        menu_move_cursor_relative(&_menu, -1);
+    }
+
     display_mark_dirty();
 }
 
