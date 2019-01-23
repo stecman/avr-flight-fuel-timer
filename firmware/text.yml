@@ -55,6 +55,5 @@ pstr_aircraftcfg_tankrotation: Tank rotation
 pstr_aircraftcfg_tankbalance: Tank auto-balance
 
 # Flight mode
-pstr_flight_armed: Timer armed
-pstr_flight_armed_start: Press to start
-pstr_flight_armed_cancel: (Hold to cancel)
+pstr_flight_remaining: REMAINING
+pstr_flight_tag_safe: SAFE

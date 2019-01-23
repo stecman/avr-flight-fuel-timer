@@ -5,9 +5,15 @@
 #include "beeper.h"
 #include "control/rtc.h"
 #include "display/display.h"
+#include "display/fonts.h"
 #include "macros.h"
 #include "system.h"
 #include "text.h"
+
+static const uint8_t kScreenWidth = 128;
+static const uint8_t kScreenHeight = 64;
+
+static const uint8_t kMargin = 10;
 
 static RtcTime _time = {0, 0, 0};
 
@@ -63,25 +69,87 @@ static char* appendValue(uint8_t value, char* output)
     return output + 3;
 }
 
+static void renderModeTag(u8g_t* u8g, const u8g_pgm_uint8_t* str, const uint8_t length)
+{
+    static const uint8_t kTagWidth = 9;
+    static const uint8_t kFontHeight = 8;
+
+    u8g_DrawBox(u8g,
+        kScreenWidth - 1 - kTagWidth,
+        kMargin,
+        kTagWidth,
+        kScreenHeight - kMargin * 2
+    );
+
+    u8g_SetColorIndex(u8g, 0);
+
+    for (uint8_t i = 0; i < length; ++i) {
+        u8g_draw_glyph(
+            u8g,
+            kScreenWidth - kTagWidth + 2,
+            (kMargin + kFontHeight + 4) + i * (kFontHeight + 1),
+            u8g_pgm_read(str + i)
+        );
+    }
+
+    u8g_SetColorIndex(u8g, 1);
+}
+
 static void render(u8g_t* u8g)
 {
-    u8g_SetFont(u8g, u8g_font_8x13Br);
-    drawCenterStrP(u8g, 13, 8, len_pstr_flight_armed, pstr_flight_armed);
+    u8g_SetFont(u8g, font_scientifica);
 
-    u8g_SetFont(u8g, u8g_font_5x8r);
-    drawCenterStrP(u8g, 15 + 10, 5, len_pstr_flight_armed_start, pstr_flight_armed_start);
-    drawCenterStrP(u8g, 15 + 20, 5, len_pstr_flight_armed_cancel, pstr_flight_armed_cancel);
+    // Print mode in top left corner
+    u8g_DrawStrP(u8g, 0, 8, pstr_flight_remaining);
+
+    // Draw main display border
+    u8g_DrawHLine(u8g, 0, kMargin, kScreenWidth - 1);
+    u8g_DrawHLine(u8g, 0, kScreenHeight - kMargin, kScreenWidth - 1);
+    u8g_DrawVLine(u8g, 0, kMargin, kScreenHeight - kMargin * 2);
+    u8g_DrawVLine(u8g, kScreenWidth - 1, kMargin, kScreenHeight - kMargin * 2);
+
+    // Draw state tag
+    renderModeTag(u8g, pstr_flight_tag_safe, len_pstr_flight_tag_safe);
 
     // Print time
-    char buf[9];
+    char buf[10];
     char* offset = buf;
     offset = appendValue(_time.hours, offset);
     offset = appendValue(_time.minutes, offset);
     offset = appendValue(_time.seconds, offset);
-    buf[8] = '\0';
+    buf[8] = 'Z';
+    buf[9] = '\0';
 
-    u8g_SetFont(u8g, u8g_font_blipfest_07n);
-    u8g_DrawStr(u8g, 8, 50, buf);
+    uint8_t xpos = 3;
+    uint8_t ypos = kScreenHeight - kMargin * 2 - 2;
+
+    static const uint8_t scale = 2;
+
+    u8g_SetFont(u8g, font_ctrld);
+    xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, buf[0], scale);
+    xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, buf[1], scale);
+
+    u8g_SetFont(u8g, font_scientifica);
+    xpos += u8g_draw_glyph(u8g, xpos, ypos, 'H');
+    xpos += 3;
+
+    u8g_SetFont(u8g, font_ctrld);
+    xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, buf[3], scale);
+    xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, buf[4], scale);
+
+    u8g_SetFont(u8g, font_scientifica);
+    xpos += u8g_draw_glyph(u8g, xpos, ypos, 'M');
+    xpos += 3;
+
+    u8g_SetFont(u8g, font_ctrld);
+    xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, buf[6], scale);
+    xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, buf[7], scale);
+
+    u8g_SetFont(u8g, font_scientifica);
+    // u8g_draw_glyph(u8g, xpos, ypos, 'S');
+
+    // Draw time again in corner
+    u8g_DrawStr(u8g, 0, 64, buf);
 }
 
 ViewStackFrame view_flight_main = {
