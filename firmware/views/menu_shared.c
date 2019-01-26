@@ -1,7 +1,6 @@
 #include "menu_shared.h"
 
 // C
-#include "assert.h"
 #include "string.h"
 
 static menu_item _shared_items[SHARED_MENU_SIZE];

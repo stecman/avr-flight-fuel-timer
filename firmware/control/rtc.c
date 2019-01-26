@@ -104,19 +104,29 @@ static bool _get_register(uint8_t offset, uint8_t* buffer, uint8_t size)
 bool rtc_read_time(RtcTime* output)
 {
     // Read seconds, minutes, hours and date in BCD form
+    // See page 11 in the DS3231 datasheet for a full description of the encoding
     uint8_t buffer[7];
 
     if (_get_register(0x0, buffer, 7)) {
         output->seconds = (buffer[0] & 0x0F) + // Seconds
-                          ((buffer[0] & 0xF0) >> 4) * 10; // 10s of seconds
+                          ((buffer[0] >> 4) * 10); // 10s of seconds
 
         output->minutes = (buffer[1] & 0x0F) + // Minutes
-                          ((buffer[1] & 0xF0) >> 4) * 10; // 10s of minutes
+                          ((buffer[1] >> 4) * 10); // 10s of minutes
 
 
         output->hours = (buffer[2] & 0x0F) + // Hours
                         ((buffer[2] & 0x10) >> 4) * 10 + // 10s of hours
                         ((buffer[2] & 0x20) >> 5) * 20; // 20s of hours
+
+        output->day = (buffer[4] & 0x0F) + // Day
+                      ((buffer[4] >> 4) * 10); // 10s of days
+
+        output->month = (buffer[5] & 0x0F) + // Month
+                        ((buffer[5] & 0x10) >> 4) * 10; // 10s of months
+
+        output->year = (buffer[6] & 0x0F) + // Year
+                       ((buffer[6] >> 4) * 10); // 10s of years
 
         return true;
     }
@@ -127,8 +137,8 @@ bool rtc_read_time(RtcTime* output)
 bool rtc_set_time(RtcTime* input)
 {
     // Buffer for new time registers in DS3231 (BCD)
-    uint8_t settings[3];
-    
+    uint8_t settings[7];
+
     // Seconds
     settings[0] = ((input->seconds / 10) << 4) | (0x0F & (input->seconds % 10));
 
@@ -151,15 +161,28 @@ bool rtc_set_time(RtcTime* input)
 
     settings[2] |= (hours & 0x0F);
 
-    return _set_register(0x0, settings, 3);
+    // Day of the week (we don't care about this)
+    settings[3] = 0;
+
+    // Day
+    settings[4] = ((input->day / 10) << 4) | (0x0F & (input->day % 10));
+
+    // Month
+    // Bit 7 of this address is the century, but we don't use this
+    settings[5] = ((input->month / 10) << 4) | (0x0F & (input->month % 10));
+
+    // Year
+    settings[6] = ((input->year / 10) << 4) | (0x0F & (input->year % 10));
+
+    return _set_register(0x0, settings, 7);
 }
 
-inline bool _update_control_register()
+inline static bool _update_control_register(void)
 {
     return _set_register(0x0E, &_controlRegister, 1);
 }
 
-inline void _start_rtc(void)
+inline static void _start_rtc(void)
 {
     // Get status register
     uint8_t status;

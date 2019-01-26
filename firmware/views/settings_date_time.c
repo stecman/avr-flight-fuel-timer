@@ -24,12 +24,14 @@ static void viewWillMount(void)
     _cursor = 0;
 }
 
-static uint8_t _clamp(uint8_t value, uint8_t max)
+static uint8_t _clamp(uint8_t value, uint8_t min, uint8_t max)
 {
     if (value == 255) {
         return max;
     } else if (value > max) {
-        return 0;
+        return min;
+    } else if (value < min) {
+        return max;
     }
 
     return value;
@@ -39,15 +41,27 @@ static void changeValue(int8_t delta)
 {
     switch (_cursor) {
         case 0: // Hours
-            _time.hours = _clamp(_time.hours + delta, 23);
+            _time.hours = _clamp(_time.hours + delta, 0, 23);
             break;
 
         case 1: // Minutes
-            _time.minutes = _clamp(_time.minutes + delta, 59);
+            _time.minutes = _clamp(_time.minutes + delta, 0, 59);
             break;
 
         case 2: // Seconds
-            _time.seconds = _clamp(_time.seconds + delta, 59);
+            _time.seconds = _clamp(_time.seconds + delta, 0, 59);
+            break;
+
+        case 3: // Day
+            _time.day = _clamp(_time.day + delta, 1, 31);
+            break;
+
+        case 4: // Month
+            _time.month = _clamp(_time.month + delta, 1, 12);
+            break;
+
+        case 5: // Year
+            _time.year = _clamp(_time.year + delta, 0, 99);
             break;
     }
 
@@ -67,7 +81,7 @@ static void handleDecrement(void)
 
 static void handleShortPress(void)
 {
-    if (_cursor < 2) {
+    if (_cursor < 5) {
         ++_cursor;
         display_mark_dirty();
     } else {
@@ -104,7 +118,7 @@ static void render(u8g_t* u8g)
 
     char buf[3];
 
-    for (uint8_t i = 0; i < 3; ++i) {
+    for (uint8_t i = 0; i < 6; ++i) {
 
         u8g_SetColorIndex(u8g, 1);
 

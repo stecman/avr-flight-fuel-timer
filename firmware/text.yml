@@ -57,3 +57,17 @@ pstr_aircraftcfg_tankbalance: Tank auto-balance
 # Flight mode
 pstr_flight_remaining: REMAINING
 pstr_flight_tag_safe: SAFE
+
+# Month names
+pstr_month_jan: JAN
+pstr_month_feb: FEB
+pstr_month_mar: MAR
+pstr_month_apr: APR
+pstr_month_may: MAY
+pstr_month_jun: JUN
+pstr_month_jul: JUL
+pstr_month_aug: AUG
+pstr_month_sep: SEP
+pstr_month_oct: OCT
+pstr_month_nov: NOV
+pstr_month_dec: DEC
