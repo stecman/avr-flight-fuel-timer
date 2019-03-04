@@ -1,27 +1,21 @@
 # Fuel timer features
 
-## Core
+## Core functionality
 
 * Display time remaining in each tank
-* Swtich active tank
-  Fuel can be drained from one tank at a time or both tanks simultaneously. The
-  user selects the tanks that are currently selected in the aircraft, which
-  causes those tank's endurance timers to count down (with time divided across
-  multiple tanks if crossfeeding is in use.)
+* Swtich active tank (including crossfeed)
 * Pre-flight programming state allowing at least configuration of time in each tank
 * Start flight action
 * End flight action (to prevent warning features tripping)
+* Keep accurate time and state across loss of main power and reset.
 
-## Useful (automatic)
+## Nice to haves
 
 * Display elapsed flight time
 * Display elapsed time on current tank
-* Indicator light when near and at fuel change time. Blinking light when in
-  reserve time.
 * Show elapsed time vs. reserve time vs. total remaining time
-* Show in reserve time differently visually (more urgent)
+* Show use of reserve time differently visually (more urgent)
 * Display flight start time
-* Allow pausing a flight and adding time to tanks
 * Protect against accidental changes to tank quantity
 * Automatic fuel balancing - alter user configured fuel change time in flight to
   balance fuel in tanks.
@@ -35,25 +29,20 @@
     or on total remaining flight time. For tank time where there is adequete
     fuel remaining in the other tank, the alarm may not be dismissable. For
     other cases, the persistent alarm may be silenced to a chirp every minute.
-
-## Useful (some manual config/action required)
-
 * Configure fuel change time
 * Configure date and time
+* Display time in UTC
+* SAR time monitoring with audible warnings to update/terminate (active even outside of flight mode)
+
+## Other (probably feature creep)
+
+* Multiple count up/down timers for navigation
 * Scroll through log of fuel changes this flight
-
-## Other
-
-* Persist state across Arduino power outages (aka. store start time, start
-  config and fuel changes in EEPROM so they can be recovered on power restored).
-  This is useful to stop bumps that may dislodge the battery, an accidental
-  power off, or a change of battery from interrupting an in progress flight.
 * Log previous flights (duration), aircraft registration / "totals flight log"
 * Allow entering fuel quantities and have the program work out the time per
   tank. At minimum, this could be a single screen where instead of configuring
   time for two tanks, you config quantity in each tank, plus burn per hour and
   unusable fuel. The burn per hour and unusable could be recalled from EEPROM.
-* Low power mode where the user has to trigger an interupt to see the display
+* Low power mode where the user has to wake with an interupt to see the display
   for five seconds at a time.
-* Wireless module with 7-segment display(s) to mount to instrument panel. This
   could show time remaining in current tank/flight, or some configurable value.
