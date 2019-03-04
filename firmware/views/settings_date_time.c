@@ -41,15 +41,15 @@ static void changeValue(int8_t delta)
 {
     switch (_cursor) {
         case 0: // Hours
-            _time.hours = _clamp(_time.hours + delta, 0, 23);
+            _time.hour = _clamp(_time.hour + delta, 0, 23);
             break;
 
         case 1: // Minutes
-            _time.minutes = _clamp(_time.minutes + delta, 0, 59);
+            _time.minute = _clamp(_time.minute + delta, 0, 59);
             break;
 
         case 2: // Seconds
-            _time.seconds = _clamp(_time.seconds + delta, 0, 59);
+            _time.second = _clamp(_time.second + delta, 0, 59);
             break;
 
         case 3: // Day

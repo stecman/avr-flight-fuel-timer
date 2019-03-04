@@ -108,14 +108,14 @@ bool rtc_read_time(RtcTime* output)
     uint8_t buffer[7];
 
     if (_get_register(0x0, buffer, 7)) {
-        output->seconds = (buffer[0] & 0x0F) + // Seconds
+        output->second = (buffer[0] & 0x0F) + // Seconds
                           ((buffer[0] >> 4) * 10); // 10s of seconds
 
-        output->minutes = (buffer[1] & 0x0F) + // Minutes
+        output->minute = (buffer[1] & 0x0F) + // Minutes
                           ((buffer[1] >> 4) * 10); // 10s of minutes
 
 
-        output->hours = (buffer[2] & 0x0F) + // Hours
+        output->hour = (buffer[2] & 0x0F) + // Hours
                         ((buffer[2] & 0x10) >> 4) * 10 + // 10s of hours
                         ((buffer[2] & 0x20) >> 5) * 20; // 20s of hours
 
@@ -140,13 +140,13 @@ bool rtc_set_time(RtcTime* input)
     uint8_t settings[7];
 
     // Seconds
-    settings[0] = ((input->seconds / 10) << 4) | (0x0F & (input->seconds % 10));
+    settings[0] = ((input->second / 10) << 4) | (0x0F & (input->second % 10));
 
     // Minutes
-    settings[1] = ((input->minutes / 10) << 4) | (0x0F & (input->minutes % 10));
+    settings[1] = ((input->minute / 10) << 4) | (0x0F & (input->minute % 10));
 
     // Hours
-    uint8_t hours = input->hours;
+    uint8_t hours = input->hour;
     settings[2] = 0x0;
 
     if (hours >= 20) {

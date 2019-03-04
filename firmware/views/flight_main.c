@@ -129,9 +129,9 @@ static void render(u8g_t* u8g)
     char timeStr[9];
     {
         char* offset = timeStr;
-        offset = appendValue(_time.hours, offset, ':');
-        offset = appendValue(_time.minutes, offset, ':');
-        offset = appendValue(_time.seconds, offset, '\0');
+        offset = appendValue(_time.hour, offset, ':');
+        offset = appendValue(_time.minute, offset, ':');
+        offset = appendValue(_time.second, offset, '\0');
     }
 
     uint8_t xpos = 3;
