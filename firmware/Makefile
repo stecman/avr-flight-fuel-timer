@@ -31,20 +31,20 @@ CFLAGS += -DVERSION_STR="\"$(shell git describe --always)\""
 CFLAGS += -DBUILD_DATE_STR="\"$(shell date '+%Y-%m-%d %H:%M')\""
 
 COMPILE = avr-gcc $(DEPFLAGS) $(CFLAGS)
-
-POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
+POSTCOMPILE = mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 # symbolic targets:
 all: $(SOURCES) main.hex
 
-text.c: text.yml scripts/build_text.py .FORCE
-	# Build a file of progmem strings
+# Build a file of progmem strings
+text.c: text.yml scripts/build_text.py
 	./scripts/build_text.py text.yml
 
 .c.o: $(DEPDIR)/%.d
+	@echo "Compiling $<"
 	@mkdir -p "$(DEPDIR)/$(shell dirname $@)"
-	$(COMPILE) -c $< -o $@
-	$(POSTCOMPILE)
+	@$(COMPILE) -c $< -o $@
+	@$(POSTCOMPILE)
 
 .S.o:
 	$(COMPILE) -x assembler-with-cpp -c $< -o $@
@@ -75,11 +75,15 @@ clean:
 	# Remove dependency tracking files
 	rm -rf "$(DEPDIR)"
 
+	# Clean up test build
+	$(MAKE) --no-print-directory -C tests clean
+
 main.elf: $(OBJECTS)
-	$(COMPILE) -o main.elf $(OBJECTS)
+	@echo "Linking $@"
+	@$(COMPILE) -o main.elf $(OBJECTS)
 
 main.hex: main.elf
-	rm -f main.hex
+	@rm -f main.hex
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 	avr-size --format=avr --mcu=$(DEVICE) main.elf
 
