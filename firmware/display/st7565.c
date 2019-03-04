@@ -31,7 +31,7 @@ static uint8_t u8g_dev_pb_full_base_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, 
 /**
  * Select chip for SPI communication
  */
-inline void selectChip(bool enable)
+static inline void selectChip(bool enable)
 {
     if (enable) {
         // Active low
@@ -41,7 +41,7 @@ inline void selectChip(bool enable)
     }
 }
 
-inline void _init_pins(void)
+static inline void _init_pins(void)
 {
     // Pull reset line low initially to reset LCD controller
     PORTB &= ~_BV(PIN_RESET);
@@ -65,7 +65,7 @@ inline void _init_pins(void)
 	SPSR = (1<<SPI2X);
 }
 
-inline void send_spi(const uint8_t data)
+static inline void send_spi(const uint8_t data)
 {
 	// Send the data
 	SPDR = data;
@@ -74,7 +74,7 @@ inline void send_spi(const uint8_t data)
 	while (!(SPSR & (1<<SPIF)));
 }
 
-inline void send_data(const uint8_t* data, const uint8_t size)
+static inline void send_data(const uint8_t* data, const uint8_t size)
 {
 	// Data/Command line goes high for sending data
 	PORTB |= _BV(PIN_DATA_CMD);
@@ -222,7 +222,7 @@ static void u8g_pb_full_Clear(u8g_pb_t *b)
     } while( ptr != end_ptr );
 }
 
-inline void u8g_pb_full_set_pixel(u8g_pb_t *b, u8g_uint_t x, u8g_uint_t y, uint8_t color_index)
+static inline void u8g_pb_full_set_pixel(u8g_pb_t *b, u8g_uint_t x, u8g_uint_t y, uint8_t color_index)
 {
     register uint8_t mask;
     uint8_t *ptr = b->buf;
