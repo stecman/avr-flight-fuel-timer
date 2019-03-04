@@ -33,6 +33,17 @@ pip install pyyaml
 make
 ```
 
+The test suite can be run using:
+
+```sh
+# Grab testing library
+git submodule init
+git submodule update
+
+# Run tests
+make test
+```
+
 ### Flashing a device
 
 `avrdude` options for your programmer can be specified with `PROGRAMMER`:

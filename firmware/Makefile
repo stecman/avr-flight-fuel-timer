@@ -4,7 +4,14 @@ PROGRAMMER = -c arduino -P /dev/ttyUSB0 -b57600
 
 AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
 
-SOURCES = $(shell find . -name '*.c' -and -not -name text.c) text.c
+# Main sources, excluding tests
+SOURCES = $(shell find . -type f -name '*.c' \
+						 -and -not -path './text.c' \
+                         -and -not -path './tests/*')
+
+# Ensure generated file is in sources (it might not exist yet)
+SOURCES += text.c
+
 OBJECTS = $(SOURCES:.c=.o)
 
 # Automatic dependency resolution
@@ -55,6 +62,9 @@ text.c: text.yml scripts/build_text.py
 
 .c.s:
 	$(COMPILE) -S $< -o $@
+
+test:
+	$(MAKE) --no-print-directory -C tests
 
 flash: all
 	$(AVRDUDE) -U flash:w:main.hex:i
