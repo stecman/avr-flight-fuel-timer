@@ -1,7 +1,13 @@
 #include <util/twi.h>
 
+static void i2c_init(void)
+{
+    // Set I2C frequency to 400KHz
+    TWBR = F_CPU/(2*400000)-8;
+}
+
 // Send I2C start condition and wait for transmission
-void i2c_send_start(void)
+static void i2c_send_start(void)
 {
     // Send start condition
     TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN) | (1<<TWEA);
@@ -11,7 +17,7 @@ void i2c_send_start(void)
 }
 
 // Send I2C stop condition
-void i2c_send_stop(void)
+static void i2c_send_stop(void)
 {
     TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
 
@@ -20,7 +26,7 @@ void i2c_send_stop(void)
 }
 
 // Send byte over I2C bus and wait for transmission
-void i2c_transmit(uint8_t data)
+static void i2c_transmit(uint8_t data)
 {
     TWDR = data;
     TWCR = (1<<TWINT) | (1<<TWEN);
@@ -30,7 +36,7 @@ void i2c_transmit(uint8_t data)
 }
 
 // Read a byte from the selected I2C slave
-uint8_t i2c_receive(bool lastByte)
+static uint8_t i2c_receive(bool lastByte)
 {
     // Mark as ready to receive
     if (lastByte) {
@@ -48,7 +54,7 @@ uint8_t i2c_receive(bool lastByte)
 }
 
 // Return true if the given status is in the status register
-bool i2c_has_status(uint8_t expected)
+inline bool i2c_has_status(uint8_t expected)
 {
     return ( (TWSR & 0xF8) == expected );
 }
