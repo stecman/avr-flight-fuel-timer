@@ -7,8 +7,10 @@
 
 // Firmware
 #include "beeper.h"
+#include "control/fram.h"
 #include "control/rotary_encoder.h"
 #include "control/rtc.h"
+#include "control/spi.h"
 #include "display/display.h"
 #include "display/menu.h"
 #include "macros.h"
@@ -34,6 +36,7 @@ int main(void)
 
     // Set I2C frequency to 400KHz
     TWBR = F_CPU/(2*400000)-8;
+    spi_init();
 
     // Initialise pins and state
     display_setup();
@@ -41,6 +44,9 @@ int main(void)
 
     beeper_setup();
     rtenc_setup();
+
+    fram_init();
+    config_restore_aircraft();
 
     // Set the root view
     global_viewstack_init(&view_menu_root);

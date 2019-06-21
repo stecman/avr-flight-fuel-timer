@@ -54,6 +54,14 @@ static void text_display_tankAutoBalance(char* buffer, uint8_t length)
     text_format_bool(config->flags & kAircraftConfig_autoBalanceTanks, buffer, length);
 }
 
+static void save_and_pop_view(void)
+{
+    // TODO: Display error if saving to persistent storage fails
+    if (config_save_aircraft()) {
+        global_viewstack_pop_silent();
+    }
+}
+
 // Populate shared menu item memory
 static inline void _populate_menu(void)
 {
@@ -61,7 +69,7 @@ static inline void _populate_menu(void)
         {
             .title = pstr_generic_back,
             .type  = kFunctionCall,
-            .onClick = &global_viewstack_pop_silent,
+            .onClick = &save_and_pop_view,
         },
         {
             .title = pstr_aircraftcfg_save,

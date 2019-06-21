@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 enum AircraftConfigFlags {
 	// If the aircraft has a crossfeed between fuel tanks
@@ -38,3 +39,7 @@ typedef struct AircraftConfig {
  * Return the aircraft config that is currently loaded
  */
 AircraftConfig* config_get_current_aircraft(void);
+
+// Hacked in save/restore in F-RAM
+bool config_restore_aircraft(void);
+bool config_save_aircraft(void);

@@ -1,5 +1,6 @@
 #include "st7565.h"
 
+#include "control/spi.h"
 #include "u8glib/src/u8g.h"
 
 #include <avr/io.h>
@@ -23,8 +24,6 @@
 #define PIN_CS PB0
 #define PIN_DATA_CMD PB1
 #define PIN_RESET PB2
-#define PIN_MOSI PB3
-#define PIN_SCLK PB5
 
 static uint8_t u8g_dev_pb_full_base_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg);
 
@@ -34,44 +33,36 @@ static uint8_t u8g_dev_pb_full_base_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, 
 static inline void selectChip(bool enable)
 {
     if (enable) {
+        // Enable CPOL mode
+        SPCR |= _BV(CPOL);
+
         // Active low
         PORTB &= ~_BV(PIN_CS);
     } else {
+        // Inactive high
         PORTB |= _BV(PIN_CS);
+
+        // Disable CPOL mode
+        SPCR &= ~_BV(CPOL);
     }
 }
 
 static inline void _init_pins(void)
 {
+    // All lines as outputs
+    DDRB |= _BV(PIN_CS) | _BV(PIN_DATA_CMD) | _BV(PIN_RESET);
+
     // Pull reset line low initially to reset LCD controller
     PORTB &= ~_BV(PIN_RESET);
 
     // Chip select not selected (active low)
     PORTB |= _BV(PIN_CS);
 
-    // All lines as outputs
-    DDRB |= _BV(PIN_CS) | _BV(PIN_DATA_CMD) | _BV(PIN_RESET) | _BV(PIN_MOSI) | _BV(PIN_SCLK);
-
     // Wait for reset
     _delay_us(10);
 
     // Pull reset line high to end the reset
-    // This needs to be done before SPI init as reset uses the SS pin (prevents SPI going into slave mode)
-	// See http://www.avrfreaks.net/forum/avr-spi-problem
 	PORTB |= _BV(PIN_RESET);
-
-    // Enable SPI as master, set clock rate fck/2
-	SPCR = (1<<SPE) | (1<<MSTR) | (1<<CPOL);
-	SPSR = (1<<SPI2X);
-}
-
-static inline void send_spi(const uint8_t data)
-{
-	// Send the data
-	SPDR = data;
-
-	// Wait for the transmission to complete
-	while (!(SPSR & (1<<SPIF)));
 }
 
 static inline void send_data(const uint8_t* data, const uint8_t size)
@@ -80,7 +71,7 @@ static inline void send_data(const uint8_t* data, const uint8_t size)
 	PORTB |= _BV(PIN_DATA_CMD);
 
     for (uint8_t i = 0; i < size; ++i) {
-    	send_spi(data[i]);
+    	spi_write(data[i]);
     }
 }
 
@@ -91,7 +82,7 @@ static void send_command(const uint8_t command)
 {
     // Data/Command line goes low for sending command bytes
 	PORTB &= ~_BV(PIN_DATA_CMD);
-	send_spi(command);
+	spi_write(command);
 }
 
 /**
@@ -103,7 +94,7 @@ static void send_command_seq(const __flash uint8_t* commands, const uint8_t size
 	PORTB &= ~_BV(PIN_DATA_CMD);
 
     for (uint8_t i = 0; i < size; ++i) {
-        send_spi(commands[i]);
+        spi_write(commands[i]);
     }
 }
 
@@ -191,6 +182,7 @@ static uint8_t _st7565_fn(u8g_t *u8g, u8g_dev_t *dev, uint8_t msg, void *arg)
             //u8g_WriteEscSeqP(u8g, dev, _ssd13xx_sleep_off);
             return 1;
     }
+
     return u8g_dev_pb_full_base_fn(u8g, dev, msg, arg);
 }
 
