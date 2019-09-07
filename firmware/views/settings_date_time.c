@@ -105,6 +105,7 @@ static char* zeroPad(uint8_t value, char* output)
 
     if (value < 10) {
         output[0] = '0';
+        ++offset;
     }
 
     utoa(value, output + offset, 10);
@@ -118,26 +119,81 @@ static void render(u8g_t* u8g)
 
     char buf[3];
 
-    for (uint8_t i = 0; i < 6; ++i) {
-
+    {
+        const uint8_t y = 30;
+        uint8_t x = 1;
         u8g_SetColorIndex(u8g, 1);
+        x = u8g_DrawStrP(u8g, x, y, pstr_time);
+        x += 10;
 
-        const uint8_t x = i * 20;
-        const uint8_t y = 36;
+        for (uint8_t i = 0; i < 3; ++i) {
+            u8g_SetColorIndex(u8g, 1);
 
-        if (i == _cursor) {
-            u8g_DrawBox(
-                u8g,
-                x - 1,
-                y - 8,
-                11,
-                8
-            );
-            u8g_SetColorIndex(u8g, 0);
+            if (i == _cursor) {
+                u8g_DrawBox(
+                    u8g,
+                    x - 1,
+                    y - 8,
+                    11,
+                    9
+                );
+                u8g_SetColorIndex(u8g, 0);
+            }
+
+            // Draw number
+            zeroPad(((const uint8_t*)&_time)[i], buf);
+            x += u8g_DrawStr(u8g, x, y, buf);
+            x += 2;
+
+            if (i != 2) {
+                u8g_SetColorIndex(u8g, 1);
+                x += u8g_draw_glyph(u8g, x, y, ':');
+                x += 2;
+            }
         }
+    }
 
-        zeroPad(((const uint8_t*)&_time)[i], buf);
-        u8g_DrawStr(u8g, x, y, buf);
+    {
+        const uint8_t y = 45;
+        uint8_t x = 1;
+        u8g_SetColorIndex(u8g, 1);
+        x = u8g_DrawStrP(u8g, x, y, pstr_date);
+        x += 10;
+
+        for (uint8_t i = 0; i < 3; ++i) {
+            uint8_t numChars = 2;
+            if (i == 2) {
+                numChars = 4;
+            }
+
+            u8g_SetColorIndex(u8g, 1);
+
+            if ((i + 3) == _cursor) {
+                u8g_DrawBox(
+                    u8g,
+                    x - 1,
+                    y - 8,
+                    (numChars * 5) + 2,
+                    9
+                );
+                u8g_SetColorIndex(u8g, 0);
+            }
+
+            // Draw number
+            if (i == 2) {
+                x += u8g_DrawStrP(u8g, x, y, U8G_PSTR("20"));
+            }
+
+            zeroPad(((const uint8_t*)&_time)[i + 3], buf);
+            x += u8g_DrawStr(u8g, x, y, buf);
+            x += 2;
+
+            if (i != 2) {
+                u8g_SetColorIndex(u8g, 1);
+                x += u8g_draw_glyph(u8g, x, y, '-');
+                x += 2;
+            }
+        }
     }
 }
 
