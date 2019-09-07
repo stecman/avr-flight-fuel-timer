@@ -2,4 +2,4 @@
 
 #include "view_stack.h"
 
-ViewStackFrame view_settings_root;
+ViewStackFrame view_device_config;

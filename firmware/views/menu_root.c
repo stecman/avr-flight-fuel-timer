@@ -12,11 +12,11 @@
 #include "views/flight_main.h"
 #include "views/fuel_loading.h"
 #include "views/menu_aircraft_config.h"
-#include "views/menu_settings_root.h"
+#include "views/menu_device_config.h"
 
-static void openSystemSettings(void)
+static void openDeviceConfig(void)
 {
-    global_viewstack_push(&view_settings_root);
+    global_viewstack_push(&view_device_config);
 }
 
 static void openFuelConfig(void)
@@ -41,8 +41,8 @@ static inline void _populate_menu(void)
 {
     const menu_item default_items[] = {
         {
-            .title = pstr_system_settings_title,
-            .onClick = &openSystemSettings,
+            .title = pstr_device_config_title,
+            .onClick = &openDeviceConfig,
             .type = kFunctionCall,
         },
         {

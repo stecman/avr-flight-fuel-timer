@@ -38,21 +38,26 @@ pstr_fuelload_title: Fuel loading
 # History / log menu
 pstr_log_title: Flight log
 
-# System settings
-pstr_system_settings_title: System settings
-pstr_date_time_title: Date and time
+# Device settings
+pstr_device_config_title: Device config
+pstr_date_time_title: Set date / time
 pstr_firmware_title: Firmware info
-pstr_contrast: Display contrast
+pstr_display_contrast: Display contrast
+pstr_date: Date
+pstr_time: Time
 
 # Aircraft config menu
 pstr_aircraftcfg_title: Aircraft config
-pstr_aircraftcfg_save: Load / store
+pstr_aircraftcfg_select_config: Change config
 pstr_aircraftcfg_burn_cruise: Fuel burn cruise
 pstr_aircraftcfg_burn_taxi: Fuel burn taxi
 pstr_aircraftcfg_xfeed: Crossfeed avail.
-pstr_aircraftcfg_reserve: Reserve time
 pstr_aircraftcfg_tankrotation: Tank rotation
-pstr_aircraftcfg_tankbalance: Tank auto-balance
+
+# Flight config (system settings
+pstr_flightcfg_title: Flight settings
+pstr_flighttcfg_reserve: Reserve fuel time
+pstr_flightcfg_tankbalance: Tank auto-balance
 
 # Flight mode
 pstr_flight_remaining: REMAINING

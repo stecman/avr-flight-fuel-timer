@@ -39,7 +39,6 @@ static void handleDecrement(void)
 //    display_mark_dirty();
 }
 
-
 static void handleShortPress(void)
 {
     global_viewstack_pop_silent();

@@ -17,8 +17,6 @@ static void config_init(void)
     _currentConfig.fuelBurnTaxi = 0;
     _currentConfig.fuelBurnCruise = 0;
     _currentConfig.tankRotationMinutes = 0;
-    _currentConfig.reserveTimeMinutes = 40;
-    _currentConfig.flags = kAircraftConfig_autoBalanceTanks;
 }
 
 bool config_restore_aircraft(void)
