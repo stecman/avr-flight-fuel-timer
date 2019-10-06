@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 #
 # Convert a YAML file into a C header and source file defining progmem strings
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     # Read YAML file
     with open(args.yaml_file) as stream:
-        data = yaml.load(stream)
+        data = yaml.safe_load(stream)
 
     try:
         # Find and open target files
@@ -67,12 +67,12 @@ if __name__ == "__main__":
         implementation.write(comment_template.format(yaml_file=args.yaml_file))
 
         # Add progmem strings as defined in the YAML
-        for var, value in data.iteritems():
+        for var, value in data.items():
             header.write(get_pstring_code(var))
             implementation.write(get_pstring_code(var, value))
 
         # Add string length information
-        for var, value in data.iteritems():
+        for var, value in data.items():
             header.write(get_metadata_code(var, value))
 
     finally:
