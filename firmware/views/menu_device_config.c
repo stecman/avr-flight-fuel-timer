@@ -113,10 +113,15 @@ static void stepSetting(int direction)
     SystemConfig* config = config_get_sysconf();
 
     if ( _menu.cursor_pos == 2 ) {
-        if (_contrast != 0 && _contrast != 63) {
-            _contrast += direction;
-            display_set_contrast(_contrast);
+        _contrast += direction;
+
+        if (_contrast == 255) {
+            _contrast = 0;
+        } else if (_contrast == 64) {
+            _contrast = 63;
         }
+
+        display_set_contrast(_contrast);
 
     } else if ( _menu.cursor_pos == 3 ) {
         config->flight.reserveTimeMinutes += direction;
