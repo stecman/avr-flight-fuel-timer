@@ -4,14 +4,12 @@
 #include <stdbool.h>
 
 #include "display/common.h"
+#include "display/defs.h"
 #include "display/fonts.h"
 
-static const uint8_t kScreenWidth = 128;
-static const uint8_t kScreenHeight = 64;
 static const uint8_t kMaxItemsOnScreen = 5;
 static const uint8_t kEdgePadding = 1;
 
-static const uint8_t kFontHeight = 9;
 static const uint8_t kMenuDrawOffset = 14;
 
 /**

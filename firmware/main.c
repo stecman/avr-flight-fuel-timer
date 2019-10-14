@@ -12,6 +12,7 @@
 #include "control/rotary_encoder.h"
 #include "control/rtc.h"
 #include "control/spi.h"
+#include "display/defs.h"
 #include "display/display.h"
 #include "display/fonts.h"
 #include "display/menu.h"
@@ -50,7 +51,7 @@ static void _renderInitScreen(u8g_t* u8g)
     u8g_DrawFrame(u8g, 0, 0, 128, 64);
 
     // Set a font
-    u8g_SetFont(u8g, font_scientifica);
+    u8g_SetFont(u8g, FONT_MAIN);
 
     for (uint8_t i = 0; i <= _initState; ++i) {
         const uint8_t yPos = ((i + 1) * kFontHeight);
@@ -99,10 +100,10 @@ int main(void)
     rtenc_setup();
 
     _displayBootProgress(kInit_FRAM);
-    fram_init();
+    // fram_init();
 
     _displayBootProgress(kInit_RTC);
-    rtc_setup();
+    // rtc_setup();
 
     _displayBootProgress(kInit_Settings);
     config_restore_aircraft();

@@ -1,14 +1,11 @@
 #include "settings_firmware.h"
 
+#include "display/defs.h"
 #include "display/icons.h"
 #include "system.h"
 #include "text.h"
 
-static const uint8_t kScreenWidth = 128;
-static const uint8_t kScreenHeight = 64;
 static const uint8_t kEdgePadding = 1;
-
-static const uint8_t kFontHeight = 8;
 
 static void handleShortPress(void)
 {

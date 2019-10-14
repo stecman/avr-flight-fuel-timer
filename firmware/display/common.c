@@ -1,7 +1,6 @@
 #include "common.h"
 
-static const uint8_t kFontHeight = 8;
-static const uint8_t kScreenWidth = 128;
+#include "display/defs.h"
 
 void display_draw_title(u8g_t* u8g, const u8g_pgm_uint8_t* title, const XbmIcon* icon)
 {
@@ -14,8 +13,8 @@ void display_draw_title(u8g_t* u8g, const u8g_pgm_uint8_t* title, const XbmIcon*
         const uint8_t width = icon->dimensions >> 4;
         const uint8_t height = icon->dimensions & 0x0F;
 
-        // Draw icon anchored to the baseline of the text
-        u8g_DrawXBMP(u8g, 5 - width, kFontHeight - height, width, height, icon->data);
+        // Draw icon anchored to the slightly above the baseline of the text
+        u8g_DrawXBMP(u8g, 5 - width, (kFontHeight - 1) - height, width, height, icon->data);
 
         // Enough spacing for the icon to not look like it's part of the title text
         titleOffsetX = 9;

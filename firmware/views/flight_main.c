@@ -4,16 +4,14 @@
 
 #include "beeper.h"
 #include "control/rtc.h"
+#include "display/defs.h"
 #include "display/display.h"
 #include "display/fonts.h"
 #include "macros.h"
 #include "system.h"
 #include "text.h"
 
-static const uint8_t kScreenWidth = 128;
-static const uint8_t kScreenHeight = 64;
-
-static const uint8_t kMargin = 10;
+const uint8_t kMargin = 10;
 
 static RtcTime _time = {0, 0, 0};
 
@@ -110,7 +108,7 @@ const __flash u8g_pgm_uint8_t* MONTHS[] = {
 
 static void render(u8g_t* u8g)
 {
-    u8g_SetFont(u8g, font_scientifica);
+    u8g_SetFont(u8g, FONT_MAIN);
 
     // Print mode in top left corner
     u8g_DrawStrP(u8g, 0, 8, pstr_flight_remaining);
@@ -136,34 +134,34 @@ static void render(u8g_t* u8g)
     uint8_t xpos = 3;
     uint8_t ypos = kScreenHeight - kMargin * 2 - 2;
 
-    static const uint8_t scale = 2;
+    const uint8_t scale = 2;
 
-    u8g_SetFont(u8g, font_ctrld);
+    u8g_SetFont(u8g, FONT_NUMERIC);
     xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, timeStr[0], scale);
     xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, timeStr[1], scale);
 
-    u8g_SetFont(u8g, font_scientifica);
+    u8g_SetFont(u8g, FONT_MAIN);
     xpos += u8g_draw_glyph(u8g, xpos, ypos, 'H');
     xpos += 3;
 
-    u8g_SetFont(u8g, font_ctrld);
+    u8g_SetFont(u8g, FONT_NUMERIC);
     xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, timeStr[3], scale);
     xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, timeStr[4], scale);
 
-    u8g_SetFont(u8g, font_scientifica);
+    u8g_SetFont(u8g, FONT_MAIN);
     xpos += u8g_draw_glyph(u8g, xpos, ypos, 'M');
     xpos += 3;
 
-    u8g_SetFont(u8g, font_ctrld);
+    u8g_SetFont(u8g, FONT_NUMERIC);
     xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, timeStr[6], scale);
     xpos += u8g_draw_glyph_scaled(u8g, xpos, ypos, timeStr[7], scale);
 
-    // u8g_SetFont(u8g, font_scientifica);
+    // u8g_SetFont(u8g, FONT_MAIN);
     // u8g_draw_glyph(u8g, xpos, ypos, 'S');
 
     // Draw date in corner
     {
-        u8g_SetFont(u8g, font_scientifica);
+        u8g_SetFont(u8g, FONT_MAIN);
 
         char dateStr[5];
         uint8_t xpos = 0;
