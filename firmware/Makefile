@@ -1,8 +1,8 @@
 DEVICE = atmega328p
-CLOCK  = 16000000
-PROGRAMMER = -c arduino -P /dev/ttyUSB0 -b57600
+CLOCK  = 8000000
+PROGRAMMER = -c dragon_isp -B 1.5MHz
 
-AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
+AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE) -V
 
 # Main sources, excluding tests
 SOURCES = $(shell find . -type f -name '*.c' \
@@ -25,6 +25,8 @@ CFLAGS += -I -I. -I$(shell pwd) -I./lib/
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 CFLAGS += -ffunction-sections -fdata-sections -Wl,--gc-sections
 CFLAGS += -Wl,--relax -mcall-prologues
+CFLAGS += -fno-tree-scev-cprop
+CFLAGS += -fno-split-wide-types
 CFLAGS += -std=gnu11 -Wstrict-prototypes
 
 # Specfic warnings as errors

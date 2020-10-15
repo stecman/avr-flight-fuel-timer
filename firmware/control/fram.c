@@ -102,9 +102,6 @@ void fram_init(void)
     DDRC |= _BV(PIN_CS);
     PORTC |= _BV(PIN_CS);
 
-    // Enable the write protect pin (tied to CS in hardware) to avoid ISP programming affecting the F-RAM
-    // (The CS and Write Protect lines are active low, which is the state of the shared pin after reset)
-
     // TODO: return error on failed initialisation instead of trying forever
     while (true) {
         uint8_t statusReg = SREG_WPEN;

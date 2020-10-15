@@ -200,6 +200,7 @@ static void render(u8g_t* u8g)
 ViewStackFrame view_settings_date_time = {
     .frameWillMount = &viewWillMount,
     .frameWillGetFocus = NULL,
+    .frameLostFocus = NULL,
     .handleIncrement = &handleIncrement,
     .handleDecrement = &handleDecrement,
     .handleShortPress = &handleShortPress,

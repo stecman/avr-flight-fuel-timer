@@ -100,10 +100,10 @@ int main(void)
     rtenc_setup();
 
     _displayBootProgress(kInit_FRAM);
-    // fram_init();
+    fram_init();
 
     _displayBootProgress(kInit_RTC);
-    // rtc_setup();
+    rtc_setup();
 
     _displayBootProgress(kInit_Settings);
     config_restore_aircraft();

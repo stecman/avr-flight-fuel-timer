@@ -169,6 +169,7 @@ static void render(u8g_t* u8g)
 ViewStackFrame view_device_config = {
     .frameWillMount = &viewWillMount,
     .frameWillGetFocus = &viewWillFocus,
+    .frameLostFocus = NULL,
     .handleIncrement = &handleIncrement,
     .handleDecrement = &handleDecrement,
     .handleShortPress = &handleShortPress,

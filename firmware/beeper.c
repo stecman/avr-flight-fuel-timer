@@ -8,6 +8,9 @@ void beeper_setup()
 {
     // PC2 as beeper output
     DDRC |= _BV(PC2);
+
+    // Demo that the buzzer is operational
+    beeper_beep_long();
 }
 
 void beeper_blip()

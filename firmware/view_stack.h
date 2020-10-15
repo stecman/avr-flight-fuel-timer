@@ -17,6 +17,10 @@ typedef struct ViewStackFrame {
     // Called before drawing. Called after frameWillMount.
     void (*frameWillGetFocus)(void);
 
+    // Callback: called each time this frame is no longer visible
+    // Called after the last draw
+    void (*frameLostFocus)(void);
+
     // User input event handlers
     // The top view currently always recieves all input
     EventHandler handleIncrement;

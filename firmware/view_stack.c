@@ -74,6 +74,11 @@ ViewStackFrame* viewstack_pop(ViewStack* vs)
     --(vs->top);
     viewstack_make_active(_get_top_frame(vs), false);
 
+    // Signal that the old view has lost focus
+    if (oldView->frameLostFocus != NULL) {
+        oldView->frameLostFocus();
+    }
+
     return oldView;
 }
 
@@ -84,19 +89,31 @@ bool viewstack_push(ViewStack* vs, ViewStackFrame* view)
         return false;
     }
 
-   // Add to the top of the stack and activate
-   ++(vs->top);
-   _set_top_frame(vs, view);
-   viewstack_make_active(view, true);
+    ViewStackFrame* oldView = _get_top_frame(vs);
 
-   return true;
+   // Add to the top of the stack and activate
+    ++(vs->top);
+    _set_top_frame(vs, view);
+    viewstack_make_active(view, true);
+
+   // Signal that the old view has lost focus
+    if (oldView->frameLostFocus != NULL) {
+        oldView->frameLostFocus();
+    }
+
+    return true;
 }
 
 void viewstack_replace(ViewStack* vs, ViewStackFrame* view)
 {
-    viewstack_teardown(_get_top_frame(vs));
+    ViewStackFrame* oldView = _get_top_frame(vs);
+    viewstack_teardown(oldView);
 
     // Replace the current top item with the passed view
     _set_top_frame(vs, view);
     viewstack_make_active(view, true);
+
+    if (oldView->frameLostFocus != NULL) {
+        oldView->frameLostFocus();
+    }
 }

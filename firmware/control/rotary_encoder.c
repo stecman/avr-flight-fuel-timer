@@ -65,11 +65,11 @@ ISR(PCINT2_vect)
     // The bits in each sequence indicate the state of PD5 and PD4 over time (LSBs are newer)
     switch (encoder_seq) {
         case 0b10000111:
-            global_eventloop_queue(_decrementHandler);
+            global_eventloop_queue(_incrementHandler);
             break;
 
         case 0b01001011:
-            global_eventloop_queue(_incrementHandler);
+            global_eventloop_queue(_decrementHandler);
             break;
     }
 }

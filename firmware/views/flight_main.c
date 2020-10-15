@@ -11,9 +11,12 @@
 #include "system.h"
 #include "text.h"
 
+#include <avr/interrupt.h>
+
 const uint8_t kMargin = 10;
 
-static RtcTime _time = {0, 0, 0};
+static volatile RtcTime _time = {0, 0, 0};
+static volatile uint8_t _flashState = 1;
 
 static void handle1HzTick(void)
 {
@@ -21,10 +24,35 @@ static void handle1HzTick(void)
     display_mark_dirty();
 }
 
+ISR(TIMER1_COMPA_vect)
+{
+    _flashState = !_flashState;
+    display_mark_dirty();
+}
+
 static void viewWillMount(void)
 {
     rtc_read_time(&_time);
     rtc_update_on_tick(true, &handle1HzTick);
+
+    // Output compare match at around 0.5 seconds
+    OCR1A = (((F_CPU)/256)/2) -1;
+
+    // Configure timer for blinking UI elements
+    // Enable Timer1 output compare match A interrupt
+    TIMSK1 |= _BV(OCIE1A);
+
+    // Configure 16-bit timer1 for a roughly 1 second period
+    TCCR1B |= _BV(WGM12) // CTC mode
+            | _BV(CS12); // Prescaler of 256
+}
+
+static void viewLostFocus(void)
+{
+    rtc_update_on_tick(false, NULL);
+
+    // Disable timer1
+    TCCR1B = 0;
 }
 
 static void handleIncrement(void)
@@ -69,6 +97,11 @@ static void renderModeTag(u8g_t* u8g, const u8g_pgm_uint8_t* str, const uint8_t 
 {
     static const uint8_t kTagWidth = 9;
     static const uint8_t kFontHeight = 8;
+
+    if (!_flashState) {
+        // Don't drwa when blinking is in off state
+        return;
+    }
 
     u8g_DrawBox(u8g,
         kScreenWidth - 1 - kTagWidth,
@@ -186,6 +219,7 @@ static void render(u8g_t* u8g)
 ViewStackFrame view_flight_main = {
     .frameWillMount = &viewWillMount,
     .frameWillGetFocus = NULL,
+    .frameLostFocus = &viewLostFocus,
     .handleIncrement = &handleIncrement,
     .handleDecrement = &handleDecrement,
     .handleShortPress = &handleShortPress,

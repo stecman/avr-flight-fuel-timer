@@ -21,7 +21,7 @@ void spi_init(void)
 
     // Enable SPI as master, set clock rate fck/2
     SPCR = (1<<SPE) | (1<<MSTR);
-    // SPSR = (1<<SPI2X);
+    SPSR = (1<<SPI2X);
 }
 
 void spi_write(const uint8_t data)
@@ -35,7 +35,6 @@ void spi_write(const uint8_t data)
 
 uint8_t spi_read(void)
 {
-    spi_init();
     // Send something to trigger an SPI transmission
     SPDR = 0x0;
 

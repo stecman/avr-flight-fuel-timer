@@ -3,9 +3,10 @@
 #include <stdint.h>
 #include "control/rtc.h"
 
+// SARTIME in the next 24 hours
 typedef struct SARTime {
-    uint8_t utcHour : 5;
-    uint8_t utcMinute : 6;
+    uint8_t utcHour;
+    uint8_t utcMinute;
 } SARTime;
 
 typedef enum TimerRunState {
@@ -21,6 +22,14 @@ typedef enum TimerRunState {
     // Engine is running in flight
     kTimerRunState_InFlight,
 } TimerRunState;
+
+typedef enum TimerRunEvent {
+    // The user has requested to leave the current state
+    kTimerRunEvent_UserDeactivate = 0,
+
+    // The user has requested to activate the next state
+    kTimerRunEvent_UserActivate = 1,
+} TimerRunEvent;
 
 typedef enum FuelTank {
     // Draw from all tanks equally

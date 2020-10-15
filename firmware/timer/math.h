@@ -14,3 +14,11 @@ static const int16_t kMinutesBetween_DiffTooLarge = 0x8000;
  */
 int16_t rtc_minutesBetween(const RtcTime* timeA, const RtcTime* timeB);
 
+/**
+ * Calculate the number of minutes remaining of fuel at a given burn rate
+ *
+ * @param  fuelQuantity - scaled fixed-point value
+ * @param  burnRate - litres per hour
+ * @return              [description]
+ */
+uint16_t ft_minutesRemaining(const uint32_t* fuelQuantity, const uint8_t burnRate);
