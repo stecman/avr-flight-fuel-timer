@@ -5,14 +5,7 @@
 
 static const __flash uint8_t month_days[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
 
- /**
- * Convert an RTC time to the number of days since Jan 1 2000 (Y2K epoch)
- * The returned value can be used to diff RTC times without dealing with calendar math.
- *
- * Assuming a year of 0-99 (2000 - 2099), the return value will be no greater than 36,160.
- * This assumes the RtcTime struct does not include the century bit from the DS3231.
- */
-static uint16_t rtc_daysSinceJan2000(const RtcTime* inTime)
+uint16_t rtc_daysSinceJan2000(const RtcTime* inTime)
 {
     // Calculate the number of days since Jan 1 2000
     // (Leap years are simple thanks to the century we're in)

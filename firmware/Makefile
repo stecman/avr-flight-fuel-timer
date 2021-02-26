@@ -66,7 +66,7 @@ text.c: text.yml scripts/build_text.py
 	$(COMPILE) -S $< -o $@
 
 test:
-	$(MAKE) --no-print-directory -C tests
+	$(MAKE) --no-print-directory -C tests test
 
 flash: all
 	$(AVRDUDE) -U flash:w:main.hex:i

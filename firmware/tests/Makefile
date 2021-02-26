@@ -1,15 +1,45 @@
-SOURCES = $(wildcard *.c) ./munit/munit.c
+TARGET_EXEC ?= testsuite
 
+# Tests are built in an additional subdir so firmware sources ("../") end up in build/
+BUILD_DIR ?= build
+BUILD_DIR_INTERNAL ?= $(BUILD_DIR)/tests
+
+TARGET = $(BUILD_DIR)/$(TARGET_EXEC)
+
+# Test sources
+SRCS := suite.c munit/munit.c $(shell find -iname 'test_*.c')
+
+# Firmware sources
+SRCS += ../timer/math.c
+
+OBJS := $(SRCS:%=$(BUILD_DIR_INTERNAL)/%.o)
+DEPS := $(OBJS:.o=.d)
+
+CFLAGS += -Wall -std=gnu99
 CFLAGS = -I -I. -I$(shell realpath `pwd`/../)
 
 # Ignore __flash attribute when compiling for tests
 CFLAGS += -D__flash=""
 
-test: build
-	./run_tests
+# Track dependencies
+CFLAGS += -MMD -MP
 
-build: $(SOURCES)
-	gcc -Wall -std=gnu99 $(SOURCES) $(CFLAGS) -o run_tests
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+
+$(BUILD_DIR_INTERNAL)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: clean test
+
+test: $(TARGET)
+	./$(TARGET)
 
 clean:
-	rm -f run_tests
+	$(RM) -r $(BUILD_DIR_INTERNAL)
+
+-include $(DEPS)
+
+MKDIR_P ?= @mkdir -p
+

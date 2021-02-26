@@ -1,16 +1,6 @@
-#include "munit/munit.h"
+#include "test_math.h"
 
-// Pull in source to test static function
-#include "timer/math.c"
-
-// Helper to define a test case with just a function name
-#define TEST_CASE(func) ((MunitTest){ \
-        .name = "/" #func, \
-        .test = &func, \
-        .tear_down = NULL, \
-        .options = MUNIT_TEST_OPTION_NONE, \
-        .parameters = NULL, \
-    })
+#include "timer/math.h"
 
 // Helper to get hours as minutes
 #define HOURS_AS_MINS(x) (x*60)
@@ -222,7 +212,7 @@ MunitResult test_time_diff_same_time(const MunitParameter params[], void* user_d
     return MUNIT_OK;
 }
 
-static MunitTest tests[] = {
+MunitTest tests[] = {
     TEST_CASE(test_time_to_days_conversion),
     TEST_CASE(test_time_diff_limits),
     TEST_CASE(test_time_diff_same_day),
@@ -230,19 +220,13 @@ static MunitTest tests[] = {
     TEST_CASE(test_time_diff_expired),
     TEST_CASE(test_time_diff_same_time),
 
-    // End of tests array
-    { .test = NULL }
+    END_TESTS_ARRAY()
 };
 
-static MunitSuite suite = {
+const MunitSuite suite_math = {
     .prefix = "/math",
     .tests = tests,
     .suites = NULL,
     .iterations = 1,
     .options = MUNIT_SUITE_OPTION_NONE,
 };
-
-int main (int argc, char* const argv[])
-{
-    return munit_suite_main(&suite, NULL, argc, argv);
-}

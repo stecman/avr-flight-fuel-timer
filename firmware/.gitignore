@@ -3,6 +3,8 @@
 /text.h
 
 # Build outsputs
+/build/
+/tests/build/
 *.elf
 *.hex
 *.o
