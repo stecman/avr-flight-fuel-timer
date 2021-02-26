@@ -4,6 +4,10 @@ PROGRAMMER = -c dragon_isp -B 1.5MHz
 
 AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE) -V
 
+BUILD_DIR ?= build
+BUILD_DIR_COMPILE = $(BUILD_DIR)/obj
+BUILD_DIR_OUTPUT = $(BUILD_DIR)/output
+
 # Main sources, excluding tests
 SOURCES = $(shell find . -type f -name '*.c' \
 						 -and -not -path './text.c' \
@@ -12,12 +16,8 @@ SOURCES = $(shell find . -type f -name '*.c' \
 # Ensure generated file is in sources (it might not exist yet)
 SOURCES += text.c
 
-OBJECTS = $(SOURCES:.c=.o)
-
-# Automatic dependency resolution
-DEPDIR := .d
-$(shell mkdir -p $(DEPDIR) >/dev/null)
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
+OBJECTS := $(SOURCES:%=$(BUILD_DIR_COMPILE)/%.o)
+DEPS := $(OBJECTS:.o=.d)
 
 # Compiler flags
 CFLAGS = -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
@@ -39,74 +39,74 @@ CFLAGS += -fdiagnostics-color=always
 CFLAGS += -DVERSION_STR="\"$(shell git describe --always)\""
 CFLAGS += -DBUILD_DATE_STR="\"$(shell date '+%Y-%m-%d %H:%M')\""
 
+# Track dependencies when building
+CFLAGS += -MMD -MP
+
 COMPILE = avr-gcc $(DEPFLAGS) $(CFLAGS)
-POSTCOMPILE = mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
+
+TARGET = $(BUILD_DIR_OUTPUT)/fueltimer
 
 # symbolic targets:
-all: $(SOURCES) main.hex
+all: $(SOURCES) $(TARGET).hex
 
 # Build a file of progmem strings
 text.c: text.yml scripts/build_text.py
 	./scripts/build_text.py text.yml
 
-.c.o: $(DEPDIR)/%.d
+$(BUILD_DIR_COMPILE)/%.c.o: %.c
 	@echo "Compiling $<"
-	@mkdir -p "$(DEPDIR)/$(shell dirname $@)"
+	$(MKDIR_P) $(dir $@)
 	@$(COMPILE) -c $< -o $@
-	@$(POSTCOMPILE)
 
-.S.o:
+$(BUILD_DIR_COMPILE)/%.S.o: %.S
+	$(MKDIR_P) $(dir $@)
 	$(COMPILE) -x assembler-with-cpp -c $< -o $@
 	# "-x assembler-with-cpp" should not be necessary since this is the default
 	# file type for the .S (with capital S) extension. However, upper case
 	# characters are not always preserved on Windows. To ensure WinAVR
 	# compatibility define the file type manually.
 
-.c.s:
+$(BUILD_DIR_COMPILE)/%.c.s: %.s
+	$(MKDIR_P) $(dir $@)
 	$(COMPILE) -S $< -o $@
+
+$(TARGET).elf: $(OBJECTS)
+	@echo "Linking $@"
+	$(MKDIR_P) $(dir $@)
+	@$(COMPILE) -o $(TARGET).elf $(OBJECTS)
+
+$(TARGET).hex: $(TARGET).elf
+	$(MKDIR_P) $(dir $@)
+	@rm -f $(TARGET).hex
+	avr-objcopy -j .text -j .data -O ihex $(TARGET).elf $(TARGET).hex
+	avr-size --format=avr --mcu=$(DEVICE) $(TARGET).elf
 
 test:
 	$(MAKE) --no-print-directory -C tests test
 
 flash: all
-	$(AVRDUDE) -U flash:w:main.hex:i
+	$(AVRDUDE) -U flash:w:$(TARGET).hex:i
 
 # Xcode uses the Makefile targets "", "clean" and "install"
 install: flash
 
 clean:
-	# Remove intermediates
-	find . -name '*.d' -or -name '*.o' -exec rm {} +
+	# Remove build files
+	rm -rf "$(BUILD_DIR)"
 
 	# Remove generated files
 	rm -f text.c text.h
 
-	# Remove binaries
-	rm -f main.hex main.elf
-
-	# Remove dependency tracking files
-	rm -rf "$(DEPDIR)"
-
 	# Clean up test build
 	$(MAKE) --no-print-directory -C tests clean
 
-main.elf: $(OBJECTS)
-	@echo "Linking $@"
-	@$(COMPILE) -o main.elf $(OBJECTS)
-
-main.hex: main.elf
-	@rm -f main.hex
-	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
-	avr-size --format=avr --mcu=$(DEVICE) main.elf
-
 disasm:	main.elf
-	avr-objdump -d main.elf
+	avr-objdump -d $(TARGET).elf
 
 # Empty target to force build on some targets
 .PHONY: FORCE
 .FORCE:
 
-$(DEPDIR)/%.d: ;
-.PRECIOUS: $(DEPDIR)/%.d
+-include $(DEPS)
 
-include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SOURCES))))
+MKDIR_P ?= @mkdir -p

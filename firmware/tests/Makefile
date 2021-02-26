@@ -28,13 +28,14 @@ $(TARGET): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
 $(BUILD_DIR_INTERNAL)/%.c.o: %.c
+	@echo "Compiling $<"
 	$(MKDIR_P) $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean test
 
 test: $(TARGET)
-	./$(TARGET)
+	@./$(TARGET)
 
 clean:
 	$(RM) -r $(BUILD_DIR_INTERNAL)
